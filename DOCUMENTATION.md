@@ -6,8 +6,8 @@ This document will be the logging of my process and steps in creating the game.
 ### Initial setup of the game:
 
 - [ ] Main menu
-    - [ ] Title text
-    - [ ] Start, towers
+    - [x] Title text
+    - [ ] Start, towers, profile, cash
 - [ ] Settings menu
     - [ ] Volume
     - [ ] Jukebox

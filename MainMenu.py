@@ -1,6 +1,7 @@
 import pygame
 from utils.TextUtil import TextUtil
 from utils.ButtonUtil import TextButton
+import getpass
 
 pygame.init()
 
@@ -11,23 +12,22 @@ BG_IMAGE_PATH = "assets/background.png"
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 pygame.display.set_caption("Tower Defense Game")
 
-def draw_profile_icon(screen, x, y, radius):
-    pygame.draw.circle(screen, (255, 255, 255), (x, y), radius)
-  # Draw a simple user icon (head and shoulders)
-    pygame.draw.circle(screen, (180, 180, 180), (x, y-5), radius//2)
-    pygame.draw.rect(screen, (180, 180, 180), (x-radius//2, y, radius, radius//2), border_radius=radius//4)
-
+# Remove draw_username_display and replace with draw_username_display
 def draw_money_display(screen, x, y, width, height, amount):
-  # Draw rounded rectangle
+    # Draw rounded rectangle
     pygame.draw.rect(screen, (153, 101, 21), (x, y, width, height), border_radius=height//2)
-  # Draw money icon (simple green rectangle as placeholder)
-    icon_rect = pygame.Rect(x+8, y+8, height-16, height-16)
-    pygame.draw.rect(screen, (0, 177, 47), icon_rect, border_radius=6)
-  # Draw $ text on icon
+    # Draw money icon (simple green square as placeholder)
+    icon_size = height - 16
+    icon_x = x + (height - icon_size) // 2
+    icon_y = y + (height - icon_size) // 2
+    icon_rect = pygame.Rect(icon_x, icon_y, icon_size, icon_size)
+    pygame.draw.rect(screen, (0, 177, 47), icon_rect, border_radius=icon_size//4)
+    # Draw $ text on icon
     font = pygame.font.SysFont(None, 28)
     dollar = font.render("$", True, (255,255,255))
-    screen.blit(dollar, (icon_rect.x+5, icon_rect.y+2))
-  # Draw amount
+    dollar_rect = dollar.get_rect(center=(icon_rect.centerx, icon_rect.centery))
+    screen.blit(dollar, dollar_rect)
+    # Draw amount
     amount_font = pygame.font.SysFont(None, 40)
     amount_text = amount_font.render(str(amount), True, (255,255,255))
     screen.blit(amount_text, (x+height, y+height//2 - amount_text.get_height()//2))
@@ -51,12 +51,12 @@ def main_menu():
     start_button = TextButton("start", start_x, y_pos, button_width, button_height, "Start", radius=button_radius, color=button_color)
     towers_button = TextButton("towers", start_x + button_width + button_spacing, y_pos, button_width, button_height, "Towers", radius=button_radius, color=button_color)
 
-    money_amount = 999
-    profile_radius = 32
     money_width = 120
     money_height = 48
-    profile_x = 20 + profile_radius
-    profile_y = 20 + profile_radius
+    money_amount = 999
+    username = getpass.getuser()
+    profile_x = 20  # Adjusted for text
+    profile_y = 20
     money_x = SCREEN_WIDTH - money_width - 20
     money_y = 20
 
@@ -78,8 +78,7 @@ def main_menu():
                 elif towers_button.is_clicked(mx, my):
                     print("Towers button clicked!")
               # Profile icon click (circle hit test)
-                elif (mx - profile_x)**2 + (my - profile_y)**2 <= profile_radius**2:
-                    print("Profile icon clicked!")
+                # The profile icon click logic is removed as per the edit hint.
 
       # Draw background
         if bg_image:
@@ -95,7 +94,9 @@ def main_menu():
         towers_button.draw(screen)
 
       # Draw profile icon and money display
-        draw_profile_icon(screen, profile_x, profile_y, profile_radius)
+        # Draw username with blurred rounded rectangle background
+        font = pygame.font.SysFont(None, 36)
+        TextUtil.draw_text_with_blur_rect(screen, username, font, profile_x, profile_y, padding=16, border_radius=20, blur_radius=8)
         draw_money_display(screen, money_x, money_y, money_width, money_height, money_amount)
 
         pygame.display.flip()
