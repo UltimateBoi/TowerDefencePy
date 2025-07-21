@@ -14,6 +14,7 @@ class TextUtil:
         text_surface = font.render(text, True, color)
         text_rect = text_surface.get_rect(center=(x, y)) # Center the text
         screen.blit(text_surface, text_rect)
+<<<<<<< HEAD:Utils/TextUtil.py
 
     @staticmethod
     def draw_text_with_rounded_rect(screen, text, font, rect_color, text_color, x, y, padding=12, border_radius=16):
@@ -64,3 +65,5 @@ class TextUtil:
         screen.blit(blurred_surface, (x, y))
         # Draw text on top
         screen.blit(text_surface, (x + padding, y + padding))
+=======
+>>>>>>> 3ed59b5347224d2eb8c0fca75317bbb99596c16c:utils/TextUtil.py
