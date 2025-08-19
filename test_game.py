@@ -8,7 +8,9 @@ import sys
 import os
 sys.path.append(os.path.dirname(__file__))
 
-from game import *
+# Import from the refactored game structure
+from game.entities import Bloon, Tower, Projectile, BloonType
+from game.systems import Wave, GameMap
 
 def test_bloon_creation():
     """Test bloon creation and properties"""
