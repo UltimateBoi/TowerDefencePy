@@ -10,7 +10,7 @@ class GameUI:
         self.font = pygame.font.SysFont(None, 36)
         self.small_font = pygame.font.SysFont(None, 24)
         
-    def draw(self, screen, money: int, lives: int, wave_number: int):
+    def draw(self, screen, money: int, lives: int, wave_number: int, paused: bool = False):
         # Draw money
         money_text = self.font.render(f"Money: ${money}", True, WHITE)
         screen.blit(money_text, (10, 10))
@@ -22,6 +22,15 @@ class GameUI:
         # Draw wave
         wave_text = self.font.render(f"Wave: {wave_number}", True, WHITE)
         screen.blit(wave_text, (10, 90))
+        
+        # Draw pause indicator
+        if paused:
+            pause_text = self.font.render("PAUSED", True, (255, 255, 0))
+            screen.blit(pause_text, (10, 130))
+        
+        # Draw controls hint
+        controls_text = self.small_font.render("ESC: Pause | Click gear icon: Settings", True, WHITE)
+        screen.blit(controls_text, (10, SCREEN_HEIGHT - 60))
         
         # Draw tower placement hint
         hint_text = self.small_font.render("Click to place tower ($10)", True, WHITE)

@@ -22,6 +22,7 @@ from .entities.bloon_types import BloonType
 from .systems.wave import Wave
 from .systems.game_map import GameMap
 from .ui.game_ui import GameUI
+from .ui.pause_menu import PauseMenu, SettingsIcon
 
 
 def get_git_commit_hash():
@@ -55,6 +56,7 @@ class TowerDefenseGame:
         self.lives = STARTING_LIVES
         self.wave_number = 1
         self.game_over = False
+        self.paused = False
         
         # Game objects
         self.load_map()
@@ -69,6 +71,8 @@ class TowerDefenseGame:
         
         # UI
         self.ui = GameUI()
+        self.pause_menu = PauseMenu()
+        self.settings_icon = SettingsIcon()
         
     def load_map(self):
         # Default map data
@@ -114,12 +118,38 @@ class TowerDefenseGame:
             if event.type == pygame.QUIT:
                 self.running = False
             elif event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_SPACE and not self.wave_active:
+                if event.key == pygame.K_ESCAPE:
+                    if self.pause_menu.visible:
+                        self.pause_menu.hide()
+                        self.paused = False
+                    else:
+                        self.pause_menu.show()
+                        self.paused = True
+                elif event.key == pygame.K_SPACE and not self.wave_active and not self.paused:
                     self.start_wave()
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 if event.button == 1:  # Left click
                     mouse_pos = pygame.mouse.get_pos()
-                    self.place_tower(mouse_pos)
+                    
+                    # Handle pause menu clicks
+                    if self.pause_menu.visible:
+                        action = self.pause_menu.handle_click(mouse_pos)
+                        if action == "resume":
+                            self.pause_menu.hide()
+                            self.paused = False
+                        elif action == "main_menu":
+                            self.running = False
+                            return  # Exit to main menu
+                        elif action == "quit":
+                            pygame.quit()
+                            exit()
+                    # Handle settings icon click
+                    elif self.settings_icon.is_clicked(mouse_pos):
+                        self.pause_menu.show()
+                        self.paused = True
+                    # Handle tower placement (only when not paused)
+                    elif not self.paused:
+                        self.place_tower(mouse_pos)
     
     def place_tower(self, position: Tuple[int, int]):
         if self.money >= TOWER_COST and self.game_map.can_place_tower(position):
@@ -127,7 +157,7 @@ class TowerDefenseGame:
             self.money -= TOWER_COST
     
     def update(self):
-        if self.game_over:
+        if self.game_over or self.paused:
             return
             
         current_time = pygame.time.get_ticks()
@@ -189,7 +219,11 @@ class TowerDefenseGame:
             projectile.draw(self.screen)
         
         # Draw UI
-        self.ui.draw(self.screen, self.money, self.lives, self.wave_number)
+        self.ui.draw(self.screen, self.money, self.lives, self.wave_number, self.paused)
+        
+        # Draw settings icon (always visible, not when game over)
+        if not self.game_over:
+            self.settings_icon.draw(self.screen)
         
         # Draw game over screen
         if self.game_over:
@@ -197,11 +231,14 @@ class TowerDefenseGame:
             text_rect = game_over_text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2))
             self.screen.blit(game_over_text, text_rect)
         
-        # Draw wave start hint
-        if not self.wave_active and self.wave_number <= len(self.waves) and not self.game_over:
+        # Draw wave start hint (only when not paused)
+        if not self.wave_active and self.wave_number <= len(self.waves) and not self.game_over and not self.paused:
             hint_text = pygame.font.SysFont(None, 36).render("Press SPACE to start next wave", True, WHITE)
             text_rect = hint_text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT - 50))
             self.screen.blit(hint_text, text_rect)
+        
+        # Draw pause menu (always last to appear on top)
+        self.pause_menu.draw(self.screen)
         
         pygame.display.flip()
     
