@@ -3,6 +3,7 @@ Main Tower Defense Game class
 """
 import pygame
 import json
+import subprocess
 from typing import List, Tuple, Optional
 
 # Import game constants
@@ -23,11 +24,29 @@ from .systems.game_map import GameMap
 from .ui.game_ui import GameUI
 
 
+def get_git_commit_hash():
+    """Get the current git commit hash (short version)"""
+    try:
+        result = subprocess.run(['git', 'rev-parse', '--short', 'HEAD'], 
+                              capture_output=True, text=True, cwd='.')
+        if result.returncode == 0:
+            return result.stdout.strip()
+    except Exception:
+        pass
+    return "unknown"
+
+
+def get_window_title():
+    """Get the window title with git commit hash"""
+    commit_hash = get_git_commit_hash()
+    return f"Tower Defense Game - git-{commit_hash}"
+
+
 class TowerDefenseGame:
     def __init__(self):
         pygame.init()
         self.screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
-        pygame.display.set_caption("Tower Defense Game")
+        pygame.display.set_caption(get_window_title())
         self.clock = pygame.time.Clock()
         self.running = True
         
