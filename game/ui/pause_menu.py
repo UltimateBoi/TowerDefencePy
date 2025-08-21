@@ -16,7 +16,7 @@ class SettingsMenu:
         self.auto_start_rounds = False
         
         # Menu dimensions
-        self.menu_width = 600  # Expanded from 500 to 600
+        self.menu_width = 600
         self.menu_height = 400
         self.menu_x = (SCREEN_WIDTH - self.menu_width) // 2
         self.menu_y = (SCREEN_HEIGHT - self.menu_height) // 2
@@ -29,7 +29,7 @@ class SettingsMenu:
         # Auto start setting position
         self.auto_start_label_x = self.menu_x + 30
         self.auto_start_label_y = self.menu_y + 100
-        self.auto_start_toggle_x = self.menu_x + self.menu_width - 80  # Adjusted for wider menu
+        self.auto_start_toggle_x = self.menu_x + self.menu_width - 80
         self.auto_start_toggle_y = self.auto_start_label_y + 5
         
         # Back button
@@ -137,7 +137,7 @@ class PauseMenu:
         
         # Menu dimensions
         self.menu_width = 400
-        self.menu_height = 400  # Expanded from 350 to 400
+        self.menu_height = 400 # Expanded from 350 to 400
         self.menu_x = (SCREEN_WIDTH - self.menu_width) // 2
         self.menu_y = (SCREEN_HEIGHT - self.menu_height) // 2
         

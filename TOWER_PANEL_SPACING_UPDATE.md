@@ -24,7 +24,7 @@ In `game/ui/tower_upgrades_screen.py`, line 233:
 self.upgrade_panel_x = self.sidebar_width + 20
 
 # After: 
-self.upgrade_panel_x = self.sidebar_width + 15  # Reduced from 20 to 15 for better balance
+self.upgrade_panel_x = self.sidebar_width + 15 # Reduced from 20 to 15 for better balance
 ```
 
 ## Result

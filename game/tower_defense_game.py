@@ -60,8 +60,8 @@ class TowerDefenseGame:
         
         # Settings
         self.auto_start_rounds = False
-        self.auto_start_delay = 3000  # 3 seconds delay before auto start
-        self.wave_completed_time = 0  # Track when wave was completed
+        self.auto_start_delay = 3000 # 3 seconds delay before auto start
+        self.wave_completed_time = 0 # Track when wave was completed
         
         # Game objects
         self.load_map()
@@ -79,7 +79,7 @@ class TowerDefenseGame:
         self.pause_menu = PauseMenu()
         self.settings_menu = SettingsMenu()
         self.settings_icon = SettingsIcon()
-        self.current_menu = "none"  # Track which menu is open: "none", "pause", "settings"
+        self.current_menu = "none" # Track which menu is open: "none", "pause", "settings"
         
     def load_map(self):
         # Default map data
@@ -209,7 +209,7 @@ class TowerDefenseGame:
             if self.current_wave.is_complete() and all(not bloon.alive or bloon.reached_end for bloon in self.bloons):
                 self.wave_active = False
                 self.wave_number += 1
-                self.wave_completed_time = current_time  # Record when wave was completed
+                self.wave_completed_time = current_time # Record when wave was completed
                 # Clear dead bloons
                 self.bloons = [bloon for bloon in self.bloons if bloon.alive and not bloon.reached_end]
         

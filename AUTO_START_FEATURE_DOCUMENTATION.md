@@ -77,7 +77,7 @@ self.current_menu = "none"              # Menu state tracking
 if self.current_wave.is_complete() and all(not bloon.alive or bloon.reached_end for bloon in self.bloons):
     self.wave_active = False
     self.wave_number += 1
-    self.wave_completed_time = current_time  # Record completion time
+    self.wave_completed_time = current_time # Record completion time
 ```
 
 #### Auto Start Timer
@@ -147,7 +147,7 @@ else:
 
 ### Timing Settings
 ```python
-self.auto_start_delay = 3000  # 3 seconds (configurable)
+self.auto_start_delay = 3000 # 3 seconds (configurable)
 ```
 
 ### Customization Points

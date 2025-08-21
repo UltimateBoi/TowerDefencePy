@@ -229,8 +229,8 @@ class TowerUpgradesScreen:
         self.selected_tower: Optional[str] = None
         
         # UI Layout
-        self.sidebar_width = 330  # Expanded from 300 to 380
-        self.upgrade_panel_x = self.sidebar_width + 15  # Reduced from 20 to 15 for better balance
+        self.sidebar_width = 330
+        self.upgrade_panel_x = self.sidebar_width + 15
         self.upgrade_panel_width = self.screen_width - self.upgrade_panel_x - 20
         
         # Create upgrade display

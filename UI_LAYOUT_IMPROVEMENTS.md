@@ -25,7 +25,7 @@ Enhanced the UI layout of the Tower Defense game to fix overflow issues and impr
 self.sidebar_width = 300
 
 # After  
-self.sidebar_width = 380  # Expanded by 80px
+self.sidebar_width = 380 # Expanded by 80px
 ```
 
 **Impact**:
@@ -40,7 +40,7 @@ self.sidebar_width = 380  # Expanded by 80px
 self.menu_height = 350
 
 # After
-self.menu_height = 400  # Expanded by 50px
+self.menu_height = 400 # Expanded by 50px
 ```
 
 **Impact**:
@@ -56,8 +56,8 @@ self.menu_width = 500
 self.auto_start_toggle_x = self.menu_x + self.menu_width - 60
 
 # After
-self.menu_width = 600  # Expanded by 100px
-self.auto_start_toggle_x = self.menu_x + self.menu_width - 80  # Adjusted toggle position
+self.menu_width = 600 # Expanded by 100px
+self.auto_start_toggle_x = self.menu_x + self.menu_width - 80 # Adjusted toggle position
 ```
 
 **Impact**:
