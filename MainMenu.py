@@ -4,6 +4,7 @@ from utils.TextUtil import TextUtil
 from utils.ButtonUtil import TextButton
 import getpass
 from game import TowerDefenseGame
+from game.ui.tower_upgrades_screen import TowerUpgradesScreen
 
 pygame.init()
 
@@ -26,7 +27,6 @@ def get_window_title():
     commit_hash = get_git_commit_hash()
     return f"Tower Defense Game - git-{commit_hash}"
 
-# Remove draw_username_display and replace with draw_username_display
 def draw_money_display(screen, x, y, width, height, amount):
    # Draw rounded rectangle
     pygame.draw.rect(screen, (153, 101, 21), (x, y, width, height), border_radius=height//2)
@@ -101,6 +101,29 @@ def main_menu():
                     pygame.display.set_caption(get_window_title())
                 elif towers_button.is_clicked(mx, my):
                     print("Towers button clicked!")
+                    # Show tower upgrades screen
+                    tower_upgrades_screen = TowerUpgradesScreen(SCREEN_WIDTH, SCREEN_HEIGHT)
+                    upgrades_running = True
+                    
+                    while upgrades_running:
+                        upgrades_events = pygame.event.get()
+                        mouse_pos = pygame.mouse.get_pos()
+                        
+                        for upgrade_event in upgrades_events:
+                            if upgrade_event.type == pygame.QUIT:
+                                upgrades_running = False
+                                running = False  # Exit main menu too
+                        
+                        result = tower_upgrades_screen.update(upgrades_events, mouse_pos)
+                        if result == "back":
+                            upgrades_running = False
+                        
+                        tower_upgrades_screen.draw(screen)
+                        pygame.display.flip()
+                    
+                    # Reinitialize display after tower upgrades screen
+                    screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
+                    pygame.display.set_caption(get_window_title())
                 # Profile icon click (circle hit test)
                 # The profile icon click logic is removed as per the edit hint.
 
