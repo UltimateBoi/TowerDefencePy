@@ -12,7 +12,7 @@ class Wave:
     def __init__(self, bloon_types: List[BloonType], counts: List[int], spawn_delay: float = 1000):
         self.bloon_types = bloon_types
         self.counts = counts
-        self.spawn_delay = spawn_delay  # milliseconds between spawns
+        self.spawn_delay = spawn_delay # milliseconds between spawns
         self.spawned = 0
         self.total_bloons = sum(counts)
         self.last_spawn_time = 0

@@ -134,7 +134,7 @@ class SettingsIcon:
         tooth_width = 4
         tooth_height = 8
         for i in range(8):
-            angle = i * 45  # 8 teeth, 45 degrees apart
+            angle = i * 45 # 8 teeth, 45 degrees apart
             import math
             x = center_x + (self.size // 2 - tooth_height // 2) * math.cos(math.radians(angle))
             y = center_y + (self.size // 2 - tooth_height // 2) * math.sin(math.radians(angle))

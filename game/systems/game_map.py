@@ -16,7 +16,7 @@ class GameMap:
     def can_place_tower(self, position: Tuple[int, int]) -> bool:
         # Simple implementation: can place anywhere except on path
         # In a real game, you'd check against placeable_areas
-        return True  # For now, allow placing anywhere
+        return True # For now, allow placing anywhere
     
     def draw(self, screen):
         # Draw grass background

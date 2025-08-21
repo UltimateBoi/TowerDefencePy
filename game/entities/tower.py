@@ -16,12 +16,12 @@ class Tower:
         self.position = position
         self.range = range_val
         self.damage = damage
-        self.fire_rate = fire_rate  # shots per second
+        self.fire_rate = fire_rate # shots per second
         self.last_shot_time = 0
         self.target: Optional['Bloon'] = None
         
     def can_shoot(self, current_time: float) -> bool:
-        return current_time - self.last_shot_time >= (1000 / self.fire_rate)  # Convert to milliseconds
+        return current_time - self.last_shot_time >= (1000 / self.fire_rate) # Convert to milliseconds
     
     def find_target(self, bloons: List['Bloon']) -> Optional['Bloon']:
         targets_in_range = []

@@ -28,7 +28,7 @@ class Projectile:
         dy = self.target.position[1] - self.position[1]
         distance = math.sqrt(dx * dx + dy * dy)
         
-        if distance < 5:  # Hit target
+        if distance < 5: # Hit target
             self.target.take_damage(self.damage)
             self.alive = False
         else:

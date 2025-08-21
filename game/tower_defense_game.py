@@ -128,7 +128,7 @@ class TowerDefenseGame:
                 elif event.key == pygame.K_SPACE and not self.wave_active and not self.paused:
                     self.start_wave()
             elif event.type == pygame.MOUSEBUTTONDOWN:
-                if event.button == 1:  # Left click
+                if event.button == 1: # Left click
                     mouse_pos = pygame.mouse.get_pos()
                     
                     # Handle pause menu clicks
@@ -139,7 +139,7 @@ class TowerDefenseGame:
                             self.paused = False
                         elif action == "main_menu":
                             self.running = False
-                            return  # Exit to main menu
+                            return # Exit to main menu
                         elif action == "quit":
                             pygame.quit()
                             exit()

@@ -7,23 +7,23 @@ The game.py file has been successfully refactored into a modular, well-organized
 
 ```
 TowerDefencePy/
-├── game/                           # Main game package
+├── game/                          # Main game package
 │   ├── __init__.py                # Package entry point
 │   ├── constants.py               # Game constants and configuration
 │   ├── tower_defense_game.py      # Main game controller class
 │   ├── entities/                  # Game entity classes
 │   │   ├── __init__.py           
-│   │   ├── bloon_types.py        # BloonType enum and properties
-│   │   ├── bloon.py              # Bloon entity class
-│   │   ├── tower.py              # Tower entity class
-│   │   └── projectile.py         # Projectile entity class
+│   │   ├── bloon_types.py         # BloonType enum and properties
+│   │   ├── bloon.py               # Bloon entity class
+│   │   ├── tower.py               # Tower entity class
+│   │   └── projectile.py          # Projectile entity class
 │   ├── systems/                   # Game system classes
 │   │   ├── __init__.py           
-│   │   ├── wave.py               # Wave management system
-│   │   └── game_map.py           # Map system and rendering
+│   │   ├── wave.py                # Wave management system
+│   │   └── game_map.py            # Map system and rendering
 │   └── ui/                        # User interface classes
 │       ├── __init__.py           
-│       └── game_ui.py            # Game UI and HUD
+│       └── game_ui.py             # Game UI and HUD
 ├── game.py                        # Refactored entry point (imports from package)
 ├── MainMenu.py                    # Main menu (unchanged)
 ├── test_game.py                   # Updated tests for new structure

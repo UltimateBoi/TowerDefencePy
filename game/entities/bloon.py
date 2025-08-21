@@ -39,7 +39,7 @@ class Bloon:
         dy = target[1] - self.position[1]
         distance = math.sqrt(dx * dx + dy * dy)
         
-        if distance < 5:  # Close enough to waypoint
+        if distance < 5: # Close enough to waypoint
             self.path_index += 1
         else:
             # Move towards target
@@ -50,7 +50,7 @@ class Bloon:
         self.health -= damage
         if self.health <= 0:
             self.alive = False
-            return True  # Bloon popped
+            return True # Bloon popped
         return False
     
     def draw(self, screen):
