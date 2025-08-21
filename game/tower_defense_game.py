@@ -22,7 +22,7 @@ from .entities.bloon_types import BloonType
 from .systems.wave import Wave
 from .systems.game_map import GameMap
 from .ui.game_ui import GameUI
-from .ui.pause_menu import PauseMenu, SettingsIcon
+from .ui.pause_menu import PauseMenu, SettingsIcon, SettingsMenu
 
 
 def get_git_commit_hash():
@@ -58,6 +58,11 @@ class TowerDefenseGame:
         self.game_over = False
         self.paused = False
         
+        # Settings
+        self.auto_start_rounds = False
+        self.auto_start_delay = 3000  # 3 seconds delay before auto start
+        self.wave_completed_time = 0  # Track when wave was completed
+        
         # Game objects
         self.load_map()
         self.bloons: List[Bloon] = []
@@ -72,7 +77,9 @@ class TowerDefenseGame:
         # UI
         self.ui = GameUI()
         self.pause_menu = PauseMenu()
+        self.settings_menu = SettingsMenu()
         self.settings_icon = SettingsIcon()
+        self.current_menu = "none"  # Track which menu is open: "none", "pause", "settings"
         
     def load_map(self):
         # Default map data
@@ -119,11 +126,17 @@ class TowerDefenseGame:
                 self.running = False
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
-                    if self.pause_menu.visible:
+                    if self.current_menu == "settings":
+                        self.settings_menu.hide()
+                        self.pause_menu.show()
+                        self.current_menu = "pause"
+                    elif self.current_menu == "pause":
                         self.pause_menu.hide()
+                        self.current_menu = "none"
                         self.paused = False
                     else:
                         self.pause_menu.show()
+                        self.current_menu = "pause"
                         self.paused = True
                 elif event.key == pygame.K_SPACE and not self.wave_active and not self.paused:
                     self.start_wave()
@@ -131,12 +144,27 @@ class TowerDefenseGame:
                 if event.button == 1: # Left click
                     mouse_pos = pygame.mouse.get_pos()
                     
+                    # Handle settings menu clicks
+                    if self.current_menu == "settings":
+                        action = self.settings_menu.handle_click(mouse_pos)
+                        if action == "back":
+                            self.settings_menu.hide()
+                            self.pause_menu.show()
+                            self.current_menu = "pause"
+                        elif action == "toggle_auto_start":
+                            self.auto_start_rounds = self.settings_menu.auto_start_rounds
                     # Handle pause menu clicks
-                    if self.pause_menu.visible:
+                    elif self.current_menu == "pause":
                         action = self.pause_menu.handle_click(mouse_pos)
                         if action == "resume":
                             self.pause_menu.hide()
+                            self.current_menu = "none"
                             self.paused = False
+                        elif action == "settings":
+                            self.pause_menu.hide()
+                            self.settings_menu.show()
+                            self.settings_menu.auto_start_rounds = self.auto_start_rounds
+                            self.current_menu = "settings"
                         elif action == "main_menu":
                             self.running = False
                             return # Exit to main menu
@@ -146,6 +174,7 @@ class TowerDefenseGame:
                     # Handle settings icon click
                     elif self.settings_icon.is_clicked(mouse_pos):
                         self.pause_menu.show()
+                        self.current_menu = "pause"
                         self.paused = True
                     # Handle tower placement (only when not paused)
                     elif not self.paused:
@@ -162,6 +191,14 @@ class TowerDefenseGame:
             
         current_time = pygame.time.get_ticks()
         
+        # Auto start rounds logic
+        if (not self.wave_active and self.auto_start_rounds and 
+            self.wave_completed_time > 0 and 
+            current_time - self.wave_completed_time >= self.auto_start_delay and
+            self.wave_number <= len(self.waves)):
+            self.start_wave()
+            self.wave_completed_time = 0
+        
         # Spawn bloons
         if self.wave_active and self.current_wave:
             new_bloon = self.current_wave.spawn_next_bloon(current_time, self.game_map.path)
@@ -172,6 +209,7 @@ class TowerDefenseGame:
             if self.current_wave.is_complete() and all(not bloon.alive or bloon.reached_end for bloon in self.bloons):
                 self.wave_active = False
                 self.wave_number += 1
+                self.wave_completed_time = current_time  # Record when wave was completed
                 # Clear dead bloons
                 self.bloons = [bloon for bloon in self.bloons if bloon.alive and not bloon.reached_end]
         
@@ -231,14 +269,37 @@ class TowerDefenseGame:
             text_rect = game_over_text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2))
             self.screen.blit(game_over_text, text_rect)
         
-        # Draw wave start hint (only when not paused)
+        # Draw wave start hint or auto start countdown
         if not self.wave_active and self.wave_number <= len(self.waves) and not self.game_over and not self.paused:
-            hint_text = pygame.font.SysFont(None, 36).render("Press SPACE to start next wave", True, WHITE)
-            text_rect = hint_text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT - 50))
-            self.screen.blit(hint_text, text_rect)
+            current_time = pygame.time.get_ticks()
+            if self.auto_start_rounds and self.wave_completed_time > 0:
+                # Show countdown for auto start
+                time_remaining = self.auto_start_delay - (current_time - self.wave_completed_time)
+                if time_remaining > 0:
+                    seconds_remaining = int(time_remaining / 1000) + 1
+                    hint_text = pygame.font.SysFont(None, 36).render(f"Next wave starts in {seconds_remaining} seconds", True, WHITE)
+                    text_rect = hint_text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT - 50))
+                    self.screen.blit(hint_text, text_rect)
+                    
+                    # Show manual override hint
+                    override_text = pygame.font.SysFont(None, 24).render("Press SPACE to start immediately", True, WHITE)
+                    override_rect = override_text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT - 20))
+                    self.screen.blit(override_text, override_rect)
+                else:
+                    hint_text = pygame.font.SysFont(None, 36).render("Starting next wave...", True, WHITE)
+                    text_rect = hint_text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT - 50))
+                    self.screen.blit(hint_text, text_rect)
+            else:
+                # Show manual start hint
+                hint_text = pygame.font.SysFont(None, 36).render("Press SPACE to start next wave", True, WHITE)
+                text_rect = hint_text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT - 50))
+                self.screen.blit(hint_text, text_rect)
         
-        # Draw pause menu (always last to appear on top)
-        self.pause_menu.draw(self.screen)
+        # Draw menus (always last to appear on top)
+        if self.current_menu == "pause":
+            self.pause_menu.draw(self.screen)
+        elif self.current_menu == "settings":
+            self.settings_menu.draw(self.screen)
         
         pygame.display.flip()
     

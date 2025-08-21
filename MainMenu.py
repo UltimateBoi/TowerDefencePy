@@ -112,7 +112,7 @@ def main_menu():
                         for upgrade_event in upgrades_events:
                             if upgrade_event.type == pygame.QUIT:
                                 upgrades_running = False
-                                running = False  # Exit main menu too
+                                running = False # Exit main menu too
                         
                         result = tower_upgrades_screen.update(upgrades_events, mouse_pos)
                         if result == "back":

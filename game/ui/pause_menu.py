@@ -5,6 +5,130 @@ import pygame
 from ..constants import WHITE, BLACK, GRAY, SCREEN_WIDTH, SCREEN_HEIGHT
 
 
+class SettingsMenu:
+    def __init__(self):
+        self.font = pygame.font.SysFont(None, 48)
+        self.button_font = pygame.font.SysFont(None, 32)
+        self.label_font = pygame.font.SysFont(None, 36)
+        self.visible = False
+        
+        # Settings state
+        self.auto_start_rounds = False
+        
+        # Menu dimensions
+        self.menu_width = 600  # Expanded from 500 to 600
+        self.menu_height = 400
+        self.menu_x = (SCREEN_WIDTH - self.menu_width) // 2
+        self.menu_y = (SCREEN_HEIGHT - self.menu_height) // 2
+        
+        # Button settings
+        self.button_width = 120
+        self.button_height = 40
+        self.toggle_size = 20
+        
+        # Auto start setting position
+        self.auto_start_label_x = self.menu_x + 30
+        self.auto_start_label_y = self.menu_y + 100
+        self.auto_start_toggle_x = self.menu_x + self.menu_width - 80  # Adjusted for wider menu
+        self.auto_start_toggle_y = self.auto_start_label_y + 5
+        
+        # Back button
+        self.back_button = pygame.Rect(
+            self.menu_x + (self.menu_width - self.button_width) // 2,
+            self.menu_y + self.menu_height - 80,
+            self.button_width,
+            self.button_height
+        )
+        
+    def show(self):
+        """Show the settings menu"""
+        self.visible = True
+        
+    def hide(self):
+        """Hide the settings menu"""
+        self.visible = False
+        
+    def handle_click(self, mouse_pos) -> str:
+        """Handle mouse clicks on settings. Returns action string."""
+        if not self.visible:
+            return "none"
+            
+        # Check auto start toggle
+        toggle_rect = pygame.Rect(
+            self.auto_start_toggle_x, self.auto_start_toggle_y,
+            self.toggle_size, self.toggle_size
+        )
+        if toggle_rect.collidepoint(mouse_pos):
+            self.auto_start_rounds = not self.auto_start_rounds
+            return "toggle_auto_start"
+            
+        # Check back button
+        if self.back_button.collidepoint(mouse_pos):
+            return "back"
+        
+        return "none"
+    
+    def draw(self, screen):
+        """Draw the settings menu"""
+        if not self.visible:
+            return
+            
+        # Draw semi-transparent overlay
+        overlay = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT))
+        overlay.set_alpha(128)
+        overlay.fill(BLACK)
+        screen.blit(overlay, (0, 0))
+        
+        # Draw menu background
+        menu_rect = pygame.Rect(self.menu_x, self.menu_y, self.menu_width, self.menu_height)
+        pygame.draw.rect(screen, WHITE, menu_rect)
+        pygame.draw.rect(screen, BLACK, menu_rect, 3)
+        
+        # Draw title
+        title_text = self.font.render("SETTINGS", True, BLACK)
+        title_rect = title_text.get_rect(center=(self.menu_x + self.menu_width // 2, self.menu_y + 40))
+        screen.blit(title_text, title_rect)
+        
+        # Draw auto start setting
+        auto_start_text = self.label_font.render("Auto Start Rounds:", True, BLACK)
+        screen.blit(auto_start_text, (self.auto_start_label_x, self.auto_start_label_y))
+        
+        # Draw toggle checkbox
+        toggle_rect = pygame.Rect(
+            self.auto_start_toggle_x, self.auto_start_toggle_y,
+            self.toggle_size, self.toggle_size
+        )
+        pygame.draw.rect(screen, WHITE, toggle_rect)
+        pygame.draw.rect(screen, BLACK, toggle_rect, 2)
+        
+        if self.auto_start_rounds:
+            # Draw checkmark
+            pygame.draw.line(screen, (0, 150, 0), 
+                           (self.auto_start_toggle_x + 4, self.auto_start_toggle_y + 10),
+                           (self.auto_start_toggle_x + 8, self.auto_start_toggle_y + 14), 3)
+            pygame.draw.line(screen, (0, 150, 0),
+                           (self.auto_start_toggle_x + 8, self.auto_start_toggle_y + 14),
+                           (self.auto_start_toggle_x + 16, self.auto_start_toggle_y + 6), 3)
+        
+        # Draw setting description
+        desc_text = self.button_font.render("Automatically start the next wave when ready", True, GRAY)
+        screen.blit(desc_text, (self.auto_start_label_x, self.auto_start_label_y + 30))
+        
+        # Draw back button
+        self._draw_button(screen, self.back_button, "Back", (150, 150, 150))
+        
+    def _draw_button(self, screen, button_rect, text, color):
+        """Draw a button with text"""
+        # Draw button background
+        pygame.draw.rect(screen, color, button_rect)
+        pygame.draw.rect(screen, BLACK, button_rect, 2)
+        
+        # Draw button text
+        text_surface = self.button_font.render(text, True, BLACK)
+        text_rect = text_surface.get_rect(center=button_rect.center)
+        screen.blit(text_surface, text_rect)
+
+
 class PauseMenu:
     def __init__(self):
         self.font = pygame.font.SysFont(None, 48)
@@ -13,7 +137,7 @@ class PauseMenu:
         
         # Menu dimensions
         self.menu_width = 400
-        self.menu_height = 300
+        self.menu_height = 400  # Expanded from 350 to 400
         self.menu_x = (SCREEN_WIDTH - self.menu_width) // 2
         self.menu_y = (SCREEN_HEIGHT - self.menu_height) // 2
         
@@ -31,16 +155,23 @@ class PauseMenu:
             self.button_height
         )
         
-        self.main_menu_button = pygame.Rect(
+        self.settings_button = pygame.Rect(
             self.menu_x + (self.menu_width - self.button_width) // 2,
             button_start_y + self.button_height + self.button_spacing,
             self.button_width,
             self.button_height
         )
         
-        self.quit_button = pygame.Rect(
+        self.main_menu_button = pygame.Rect(
             self.menu_x + (self.menu_width - self.button_width) // 2,
             button_start_y + 2 * (self.button_height + self.button_spacing),
+            self.button_width,
+            self.button_height
+        )
+        
+        self.quit_button = pygame.Rect(
+            self.menu_x + (self.menu_width - self.button_width) // 2,
+            button_start_y + 3 * (self.button_height + self.button_spacing),
             self.button_width,
             self.button_height
         )
@@ -64,6 +195,8 @@ class PauseMenu:
             
         if self.resume_button.collidepoint(mouse_pos):
             return "resume"
+        elif self.settings_button.collidepoint(mouse_pos):
+            return "settings"
         elif self.main_menu_button.collidepoint(mouse_pos):
             return "main_menu"
         elif self.quit_button.collidepoint(mouse_pos):
@@ -94,6 +227,7 @@ class PauseMenu:
         
         # Draw buttons
         self._draw_button(screen, self.resume_button, "Resume", (100, 200, 100))
+        self._draw_button(screen, self.settings_button, "Settings", (100, 150, 200))
         self._draw_button(screen, self.main_menu_button, "Main Menu", (200, 200, 100))
         self._draw_button(screen, self.quit_button, "Quit Game", (200, 100, 100))
         

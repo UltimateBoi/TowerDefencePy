@@ -68,7 +68,7 @@ class UpgradePathDisplay:
     def __init__(self, x: int, y: int, width: int, height: int):
         self.rect = pygame.Rect(x, y, width, height)
         self.tower_data: Optional[Dict] = None
-        self.difficulty = "E"  # E=Easy, M=Medium, H=Hard, I=Impoppable
+        self.difficulty = "E" # E=Easy, M=Medium, H=Hard, I=Impoppable
         
     def set_tower(self, tower_data: Dict):
         """Set the tower to display upgrade paths for"""
@@ -229,8 +229,8 @@ class TowerUpgradesScreen:
         self.selected_tower: Optional[str] = None
         
         # UI Layout
-        self.sidebar_width = 300
-        self.upgrade_panel_x = self.sidebar_width + 20
+        self.sidebar_width = 330  # Expanded from 300 to 380
+        self.upgrade_panel_x = self.sidebar_width + 15  # Reduced from 20 to 15 for better balance
         self.upgrade_panel_width = self.screen_width - self.upgrade_panel_x - 20
         
         # Create upgrade display
