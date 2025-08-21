@@ -13,7 +13,7 @@ from typing import Dict, List, Optional, Tuple
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', '..'))
 
 from utils.ButtonUtil import TextButton
-from utils.TextUtil import TextUtil
+from .text_renderer import TextRenderer, TextAlignment, VerticalAlignment
 
 
 class TowerCard:
@@ -42,16 +42,47 @@ class TowerCard:
         pygame.draw.circle(screen, icon_color, icon_center, icon_radius)
         pygame.draw.circle(screen, (255, 255, 255), icon_center, icon_radius, 2)
         
-        # Tower name
+        # Tower name (handle multi-line for long names)
         font = pygame.font.SysFont(None, 24)
-        name_text = font.render(self.tower_data['name'], True, (255, 255, 255))
-        name_rect = name_text.get_rect(centerx=self.rect.centerx, y=self.rect.y + 85)
-        screen.blit(name_text, name_rect)
+        tower_name = self.tower_data['name']
+        
+        # Check if name needs to be split into two lines
+        name_surface = font.render(tower_name, True, (255, 255, 255))
+        if name_surface.get_width() > self.rect.width - 10: # Leave 5px margin on each side
+            # Split long names like "Boomerang Monkey" into two lines
+            words = tower_name.split()
+            if len(words) >= 2:
+                # Split into two lines
+                line1 = words[0]
+                line2 = ' '.join(words[1:])
+                
+                # Render first line
+                line1_text = font.render(line1, True, (255, 255, 255))
+                line1_rect = line1_text.get_rect(centerx=self.rect.centerx, y=self.rect.y + 80)
+                screen.blit(line1_text, line1_rect)
+                
+                # Render second line
+                line2_text = font.render(line2, True, (255, 255, 255))
+                line2_rect = line2_text.get_rect(centerx=self.rect.centerx, y=self.rect.y + 100)
+                screen.blit(line2_text, line2_rect)
+                
+                # Adjust cost position to be lower
+                cost_y = self.rect.y + 125
+            else:
+                # Single word that's too long, render as-is
+                name_rect = name_surface.get_rect(centerx=self.rect.centerx, y=self.rect.y + 85)
+                screen.blit(name_surface, name_rect)
+                cost_y = self.rect.y + 110
+        else:
+            # Name fits on one line
+            name_rect = name_surface.get_rect(centerx=self.rect.centerx, y=self.rect.y + 85)
+            screen.blit(name_surface, name_rect)
+            cost_y = self.rect.y + 110
         
         # Base cost
         cost_font = pygame.font.SysFont(None, 20)
         cost_text = cost_font.render(f"${self.tower_data['base_cost']}", True, (255, 255, 0))
-        cost_rect = cost_text.get_rect(centerx=self.rect.centerx, y=self.rect.y + 110)
+        cost_rect = cost_text.get_rect(centerx=self.rect.centerx, y=cost_y)
         screen.blit(cost_text, cost_rect)
         
     def handle_click(self, pos: Tuple[int, int]) -> bool:
@@ -93,15 +124,30 @@ class UpgradePathDisplay:
         header_rect = pygame.Rect(self.rect.x + 10, self.rect.y + 10, self.rect.width - 20, header_height)
         pygame.draw.rect(screen, (40, 40, 40), header_rect, border_radius=5)
         
-        # Tower name and description
+        # Tower name and description with text wrapping
         name_font = pygame.font.SysFont(None, 36)
         desc_font = pygame.font.SysFont(None, 24)
         
         name_text = name_font.render(self.tower_data['name'], True, (255, 255, 255))
-        desc_text = desc_font.render(self.tower_data['description'], True, (200, 200, 200))
-        
         screen.blit(name_text, (header_rect.x + 10, header_rect.y + 10))
-        screen.blit(desc_text, (header_rect.x + 10, header_rect.y + 45))
+        
+        # Description with text wrapping
+        desc_rect = pygame.Rect(
+            header_rect.x + 10, 
+            header_rect.y + 45, 
+            header_rect.width - 170, # Leave space for difficulty selector
+            30
+        )
+        TextRenderer.render_wrapped_text(
+            screen, 
+            self.tower_data['description'], 
+            desc_font, 
+            (200, 200, 200), 
+            desc_rect,
+            alignment=TextAlignment.LEFT,
+            vertical_alignment=VerticalAlignment.TOP,
+            max_lines=2
+        )
         
         # Difficulty selector
         diff_x = header_rect.right - 150
@@ -125,7 +171,7 @@ class UpgradePathDisplay:
             text_rect = diff_text.get_rect(center=diff_rect.center)
             screen.blit(diff_text, text_rect)
         
-        # Base stats
+        # Base stats with text wrapping
         stats_y = header_rect.bottom + 20
         stats_font = pygame.font.SysFont(None, 20)
         stats_text = "Base Stats: "
@@ -133,8 +179,17 @@ class UpgradePathDisplay:
         for stat, value in base_stats.items():
             stats_text += f"{stat.replace('_', ' ').title()}: {value}  "
         
-        stats_surface = stats_font.render(stats_text, True, (255, 255, 255))
-        screen.blit(stats_surface, (self.rect.x + 20, stats_y))
+        stats_rect = pygame.Rect(self.rect.x + 20, stats_y, self.rect.width - 40, 25)
+        TextRenderer.render_wrapped_text(
+            screen, 
+            stats_text, 
+            stats_font, 
+            (255, 255, 255), 
+            stats_rect,
+            alignment=TextAlignment.LEFT,
+            vertical_alignment=VerticalAlignment.TOP,
+            max_lines=2
+        )
         
         # Upgrade paths
         paths_y = stats_y + 40
@@ -161,10 +216,19 @@ class UpgradePathDisplay:
         name_rect = name_text.get_rect(centerx=path_rect.centerx, y=path_rect.y + 5)
         screen.blit(name_text, name_rect)
         
+        # Path description with text wrapping
         desc_font = pygame.font.SysFont(None, 16)
-        desc_text = desc_font.render(path_data['description'], True, (200, 200, 200))
-        desc_rect = desc_text.get_rect(centerx=path_rect.centerx, y=path_rect.y + 25)
-        screen.blit(desc_text, desc_rect)
+        desc_rect = pygame.Rect(path_rect.x + 5, path_rect.y + 25, path_rect.width - 10, 20)
+        TextRenderer.render_wrapped_text(
+            screen, 
+            path_data['description'], 
+            desc_font, 
+            (200, 200, 200), 
+            desc_rect,
+            alignment=TextAlignment.CENTER,
+            vertical_alignment=VerticalAlignment.TOP,
+            max_lines=2
+        )
         
         # Upgrades
         upgrades = path_data.get('upgrades', [])
@@ -195,10 +259,25 @@ class UpgradePathDisplay:
             cost_rect = cost_surface.get_rect(right=upgrade_rect.right - 5, y=upgrade_rect.y + 2)
             screen.blit(cost_surface, cost_rect)
             
-            # Upgrade description
+            # Upgrade description with text wrapping
             desc_font = pygame.font.SysFont(None, 14)
-            desc_surface = desc_font.render(upgrade['description'], True, (200, 200, 200))
-            screen.blit(desc_surface, (upgrade_rect.x + 5, upgrade_rect.y + 20))
+            desc_rect = pygame.Rect(
+                upgrade_rect.x + 5, 
+                upgrade_rect.y + 20, 
+                upgrade_rect.width - 10, 
+                upgrade_rect.height - 22
+            )
+            TextRenderer.render_wrapped_text(
+                screen, 
+                upgrade['description'], 
+                desc_font, 
+                (200, 200, 200), 
+                desc_rect,
+                alignment=TextAlignment.LEFT,
+                vertical_alignment=VerticalAlignment.TOP,
+                line_spacing=1,
+                max_lines=3
+            )
     
     def handle_click(self, pos: Tuple[int, int]):
         """Handle clicks on the upgrade paths (e.g., difficulty selection)"""
@@ -260,16 +339,16 @@ class TowerUpgradesScreen:
             print(f"Error loading tower data: {e}")
             # Fallback data
             self.towers_data = {
-                "dart_tower": {
-                    "name": "Dart Tower",
+                "dart_monkey": {
+                    "name": "Dart Monkey",
                     "description": "Basic tower that shoots darts",
-                    "base_cost": 100,
-                    "base_stats": {"damage": 1, "range": 100, "fire_rate": 1.0},
+                    "base_cost": 200,
+                    "base_stats": {"damage": 1, "range": 32, "fire_rate": 0.95},
                     "icon_color": [139, 69, 19],
                     "upgrade_paths": {}
                 }
             }
-            self.difficulty_multipliers = {"E": 1.0, "M": 1.2, "H": 1.5, "I": 2.0}
+            self.difficulty_multipliers = {"E": 1.0, "M": 1.08, "H": 1.2, "I": 1.3}
     
     def create_tower_cards(self):
         """Create tower cards for the sidebar"""

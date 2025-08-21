@@ -1,488 +1,490 @@
 {
   "towers": {
-    "dart_tower": {
-      "name": "Dart Tower",
-      "description": "A basic tower that shoots darts at bloons",
-      "base_cost": 100,
+    "dart_monkey": {
+      "name": "Dart Monkey",
+      "description": "Throws a single dart that can pop one bloon",
+      "base_cost": 200,
       "base_stats": {
         "damage": 1,
-        "range": 100,
-        "fire_rate": 1.0,
+        "range": 32,
+        "fire_rate": 0.95,
         "pierce": 1
       },
       "icon_color": [139, 69, 19],
       "upgrade_paths": {
         "path1": {
-          "name": "Damage Focus",
-          "description": "Increases damage and penetration",
+          "name": "Sharp Shooter",
+          "description": "Improved accuracy, range and special ammunition",
           "upgrades": [
             {
-              "name": "Sharp Darts",
-              "description": "+1 damage, can pop 2 bloons",
-              "cost": 150,
-              "stats": {"damage": 2, "pierce": 2}
+              "name": "Sharp Shots",
+              "description": "+3 pierce",
+              "cost": 130,
+              "stats": {"pierce": 4}
             },
             {
-              "name": "Razor Sharp Darts",
-              "description": "+1 damage, can pop 3 bloons",
-              "cost": 300,
-              "stats": {"damage": 3, "pierce": 3}
+              "name": "Razor Sharp Shots",
+              "description": "+2 pierce, +1 damage",
+              "cost": 350,
+              "stats": {"pierce": 6, "damage": 2}
             },
             {
               "name": "Spike-o-pult",
-              "description": "+2 damage, can pop 5 bloons",
-              "cost": 750,
-              "stats": {"damage": 5, "pierce": 5}
+              "description": "Throws spiked balls instead of darts. +4 damage, +18 pierce, but slower attack speed",
+              "cost": 2700,
+              "stats": {"damage": 6, "pierce": 24, "fire_rate": 0.67}
             },
             {
               "name": "Juggernaut",
-              "description": "Massive damage, can pop 10 bloons",
-              "cost": 2000,
-              "stats": {"damage": 10, "pierce": 10}
+              "description": "Hurls heavy juggernaut that crushes through bloons. +14 damage, +76 pierce",
+              "cost": 18500,
+              "stats": {"damage": 20, "pierce": 100, "fire_rate": 0.67}
             },
             {
               "name": "Ultra-Juggernaut",
-              "description": "Ultimate damage, can pop 20 bloons",
-              "cost": 5000,
-              "stats": {"damage": 20, "pierce": 20}
+              "description": "Ultra-hard spiked balls crush through everything. +80 damage, splits on impact",
+              "cost": 55000,
+              "stats": {"damage": 100, "pierce": 200, "fire_rate": 0.67}
             }
           ]
         },
         "path2": {
-          "name": "Range & Speed",
-          "description": "Increases range and attack speed",
+          "name": "Multi-Shot",
+          "description": "More darts and wider coverage",
           "upgrades": [
             {
-              "name": "Long Range Darts",
-              "description": "+20 range",
+              "name": "Quick Shots",
+              "description": "Attacks 15% faster",
               "cost": 120,
-              "stats": {"range": 120}
-            },
-            {
-              "name": "Enhanced Eyesight",
-              "description": "+30 range, +0.2 fire rate",
-              "cost": 250,
-              "stats": {"range": 150, "fire_rate": 1.2}
-            },
-            {
-              "name": "Crossbow",
-              "description": "+40 range, +0.5 fire rate",
-              "cost": 600,
-              "stats": {"range": 190, "fire_rate": 1.7}
-            },
-            {
-              "name": "Sharp Shooter",
-              "description": "+60 range, +1.0 fire rate",
-              "cost": 1500,
-              "stats": {"range": 250, "fire_rate": 2.7}
-            },
-            {
-              "name": "Crossbow Master",
-              "description": "+100 range, +2.0 fire rate",
-              "cost": 4000,
-              "stats": {"range": 350, "fire_rate": 4.7}
-            }
-          ]
-        },
-        "path3": {
-          "name": "Special Abilities",
-          "description": "Adds special effects and abilities",
-          "upgrades": [
-            {
-              "name": "Multi-Shot",
-              "description": "Shoots 2 darts at once",
-              "cost": 200,
-              "stats": {"projectiles": 2}
+              "stats": {"fire_rate": 1.09}
             },
             {
               "name": "Triple Shot",
-              "description": "Shoots 3 darts at once",
-              "cost": 400,
-              "stats": {"projectiles": 3}
+              "description": "Throws 3 darts instead of 1",
+              "cost": 300,
+              "stats": {"projectiles": 3, "fire_rate": 1.09}
             },
             {
               "name": "Super Monkey Fan Club",
-              "description": "Shoots 5 darts, increased speed",
-              "cost": 1000,
-              "stats": {"projectiles": 5, "fire_rate": 2.0}
+              "description": "Ability: Converts nearby Dart Monkeys into Super Monkeys temporarily. +1 damage",
+              "cost": 7000,
+              "stats": {"damage": 2, "projectiles": 3, "fire_rate": 1.09}
             },
             {
               "name": "Plasma Monkey Fan Club",
-              "description": "Shoots plasma bolts",
-              "cost": 3000,
-              "stats": {"projectiles": 5, "fire_rate": 3.0, "damage": 3}
+              "description": "Better ability and Dart Monkey becomes a Plasma Monkey. +8 damage, +4 pierce",
+              "cost": 60000,
+              "stats": {"damage": 10, "pierce": 5, "projectiles": 3, "fire_rate": 1.09}
             },
             {
-              "name": "Avatar of the Dart",
-              "description": "Ultimate dart monkey transformation",
-              "cost": 8000,
-              "stats": {"projectiles": 8, "fire_rate": 5.0, "damage": 5, "range": 200}
-            }
-          ]
-        }
-      }
-    },
-    "sniper_tower": {
-      "name": "Sniper Tower",
-      "description": "Long range tower with high damage",
-      "base_cost": 300,
-      "base_stats": {
-        "damage": 5,
-        "range": 300,
-        "fire_rate": 0.5,
-        "pierce": 1
-      },
-      "icon_color": [64, 64, 64],
-      "upgrade_paths": {
-        "path1": {
-          "name": "Damage Focus",
-          "description": "Increases damage and critical hits",
-          "upgrades": [
-            {
-              "name": "Full Metal Jacket",
-              "description": "+3 damage, can hit lead bloons",
-              "cost": 400,
-              "stats": {"damage": 8}
-            },
-            {
-              "name": "Large Calibre",
-              "description": "+5 damage, +1 pierce",
-              "cost": 800,
-              "stats": {"damage": 13, "pierce": 2}
-            },
-            {
-              "name": "Deadly Precision",
-              "description": "+7 damage, chance for critical hits",
-              "cost": 2000,
-              "stats": {"damage": 20, "crit_chance": 0.1}
-            },
-            {
-              "name": "Maim MOAB",
-              "description": "+15 damage, slows MOAB-class bloons",
-              "cost": 5000,
-              "stats": {"damage": 35, "moab_slow": true}
-            },
-            {
-              "name": "Cripple MOAB",
-              "description": "+25 damage, massive MOAB damage",
-              "cost": 12000,
-              "stats": {"damage": 60, "moab_damage": 100}
-            }
-          ]
-        },
-        "path2": {
-          "name": "Range & Speed",
-          "description": "Increases range and attack speed",
-          "upgrades": [
-            {
-              "name": "Night Vision Goggles",
-              "description": "+50 range, can see camo bloons",
-              "cost": 350,
-              "stats": {"range": 350, "camo_detection": true}
-            },
-            {
-              "name": "Shrapnel Shot",
-              "description": "+0.2 fire rate, explodes on impact",
-              "cost": 700,
-              "stats": {"fire_rate": 0.7, "explosion": true}
-            },
-            {
-              "name": "Bouncing Bullet",
-              "description": "+0.3 fire rate, bullets bounce",
-              "cost": 1500,
-              "stats": {"fire_rate": 1.0, "bounce": 3}
-            },
-            {
-              "name": "Supply Drop",
-              "description": "+0.5 fire rate, generates money",
-              "cost": 4000,
-              "stats": {"fire_rate": 1.5, "money_generation": 200}
-            },
-            {
-              "name": "Elite Sniper",
-              "description": "+1.0 fire rate, elite targeting",
-              "cost": 10000,
-              "stats": {"fire_rate": 2.5, "elite_targeting": true}
+              "name": "Avatar of Wrath",
+              "description": "Ultimate Druid transformation. Massive damage and abilities",
+              "cost": 120000,
+              "stats": {"damage": 25, "pierce": 15, "projectiles": 5, "fire_rate": 2.0}
             }
           ]
         },
         "path3": {
-          "name": "Support",
-          "description": "Provides support abilities",
+          "name": "Seeking Darts",
+          "description": "Darts that can seek out and follow bloons",
           "upgrades": [
             {
-              "name": "Flash Bomb",
-              "description": "Stuns bloons on hit",
-              "cost": 250,
-              "stats": {"stun_duration": 1.0}
+              "name": "Long Range Darts",
+              "description": "+8 range, can see camo bloons",
+              "cost": 90,
+              "stats": {"range": 40}
             },
             {
-              "name": "MOAB Stun",
-              "description": "Can stun MOAB-class bloons",
-              "cost": 600,
-              "stats": {"stun_duration": 1.5, "moab_stun": true}
+              "name": "Enhanced Eyesight",
+              "description": "+10 range, can see camo bloons",
+              "cost": 170,
+              "stats": {"range": 50}
             },
             {
-              "name": "Semi-Automatic",
-              "description": "+1.0 fire rate, faster stuns",
-              "cost": 1200,
-              "stats": {"fire_rate": 1.5, "stun_duration": 2.0}
+              "name": "Crossbow",
+              "description": "Powerful crossbow that shoots bolts. +1 damage, +2 pierce, +18 range",
+              "cost": 1700,
+              "stats": {"damage": 2, "pierce": 3, "range": 68}
             },
             {
-              "name": "Full Auto Rifle",
-              "description": "+2.0 fire rate, area stun",
-              "cost": 3500,
-              "stats": {"fire_rate": 2.5, "stun_area": 50}
-            },
-            {
-              "name": "Elite Defender",
-              "description": "Extreme fire rate when lives are low",
+              "name": "Sharp Shooter",
+              "description": "Incredibly accurate shots can ricochet to nearby targets. +1 damage, +40 range",
               "cost": 8500,
-              "stats": {"fire_rate": 5.0, "lives_boost": true}
+              "stats": {"damage": 3, "pierce": 7, "range": 108}
+            },
+            {
+              "name": "Crossbow Master",
+              "description": "Each shot splits into 3 bolts that seek nearby bloons. +7 damage, massive range",
+              "cost": 28000,
+              "stats": {"damage": 10, "pierce": 7, "range": 150, "projectiles": 3}
             }
           ]
         }
       }
     },
-    "bomb_tower": {
-      "name": "Bomb Tower",
-      "description": "Shoots explosive bombs that damage multiple bloons",
-      "base_cost": 400,
+    "tack_shooter": {
+      "name": "Tack Shooter",
+      "description": "Shoots 8 tacks in all directions",
+      "base_cost": 280,
       "base_stats": {
-        "damage": 2,
-        "range": 80,
-        "fire_rate": 0.8,
-        "blast_radius": 30
+        "damage": 1,
+        "range": 23,
+        "fire_rate": 1.7,
+        "pierce": 1,
+        "projectiles": 8
       },
-      "icon_color": [139, 0, 0],
+      "icon_color": [128, 128, 128],
+      "upgrade_paths": {
+        "path1": {
+          "name": "More Tacks",
+          "description": "More tacks and better penetration",
+          "upgrades": [
+            {
+              "name": "Faster Shooting",
+              "description": "Shoots tacks faster",
+              "cost": 120,
+              "stats": {"fire_rate": 2.23}
+            },
+            {
+              "name": "Even Faster Shooting",
+              "description": "Shoots tacks even faster",
+              "cost": 270,
+              "stats": {"fire_rate": 3.0}
+            },
+            {
+              "name": "Hot Shots",
+              "description": "Hot tacks can pop Lead Bloons and deal extra damage",
+              "cost": 1500,
+              "stats": {"damage": 2, "fire_rate": 3.0}
+            },
+            {
+              "name": "Ring of Fire",
+              "description": "Continuous ring of fire around the Tack Shooter",
+              "cost": 17500,
+              "stats": {"damage": 5, "fire_rate": 10.0, "range": 35}
+            },
+            {
+              "name": "Inferno Ring",
+              "description": "Bigger, hotter ring of fire with increased damage",
+              "cost": 45000,
+              "stats": {"damage": 10, "fire_rate": 15.0, "range": 50}
+            }
+          ]
+        },
+        "path2": {
+          "name": "Bigger Tacks",
+          "description": "Bigger tacks with more range and pierce",
+          "upgrades": [
+            {
+              "name": "Long Range Tacks",
+              "description": "+5 range",
+              "cost": 130,
+              "stats": {"range": 28}
+            },
+            {
+              "name": "Super-Wide Tacks",
+              "description": "+2 pierce, +2 range",
+              "cost": 320,
+              "stats": {"pierce": 3, "range": 30}
+            },
+            {
+              "name": "Blade Shooter",
+              "description": "Shoots sharp blades instead of tacks. +2 damage, +4 pierce",
+              "cost": 3800,
+              "stats": {"damage": 3, "pierce": 7, "range": 30}
+            },
+            {
+              "name": "Blade Maelstrom",
+              "description": "Ability: Covers nearby area in a storm of blades. +1 damage",
+              "cost": 14000,
+              "stats": {"damage": 4, "pierce": 10, "range": 35}
+            },
+            {
+              "name": "Super Maelstrom",
+              "description": "Much more powerful blade storm ability. +6 damage",
+              "cost": 110000,
+              "stats": {"damage": 10, "pierce": 15, "range": 45}
+            }
+          ]
+        },
+        "path3": {
+          "name": "Tack Sprayer",
+          "description": "Shoots different types of specialized tacks",
+          "upgrades": [
+            {
+              "name": "Tacks Zone",
+              "description": "Shoots tacks that create damage zones",
+              "cost": 200,
+              "stats": {"projectiles": 16}
+            },
+            {
+              "name": "Road Spikes",
+              "description": "Periodically drops road spikes on the track",
+              "cost": 400,
+              "stats": {"projectiles": 16}
+            },
+            {
+              "name": "Spike Storm",
+              "description": "Ability: Covers the entire track with spikes. +1 damage to tacks",
+              "cost": 4000,
+              "stats": {"damage": 2, "projectiles": 16}
+            },
+            {
+              "name": "Carpet of Spikes",
+              "description": "More powerful spike storm with permanent spike carpet",
+              "cost": 12000,
+              "stats": {"damage": 3, "projectiles": 24}
+            },
+            {
+              "name": "Permaspike",
+              "description": "Creates a permanent pile of spikes that grows stronger over time",
+              "cost": 25000,
+              "stats": {"damage": 5, "pierce": 50, "projectiles": 32}
+            }
+          ]
+        }
+      }
+    },
+    "boomerang_monkey": {
+      "name": "Boomerang Monkey",
+      "description": "Throws a boomerang that flies out and comes back",
+      "base_cost": 325,
+      "base_stats": {
+        "damage": 1,
+        "range": 43,
+        "fire_rate": 1.18,
+        "pierce": 3
+      },
+      "icon_color": [34, 139, 34],
+      "upgrade_paths": {
+        "path1": {
+          "name": "Multi-Target",
+          "description": "Better targeting and more projectiles",
+          "upgrades": [
+            {
+              "name": "Improved Rangs",
+              "description": "+5 range, flies further before returning",
+              "cost": 300,
+              "stats": {"range": 48}
+            },
+            {
+              "name": "Glaives",
+              "description": "Razor sharp glaives replace boomerangs. +1 damage, +4 pierce",
+              "cost": 480,
+              "stats": {"damage": 2, "pierce": 7}
+            },
+            {
+              "name": "Glaive Ricochet",
+              "description": "Glaives ricochet between up to 6 targets. +1 damage, +26 pierce",
+              "cost": 3200,
+              "stats": {"damage": 3, "pierce": 33}
+            },
+            {
+              "name": "M.O.A.R Glaives",
+              "description": "Throws 4 glaives at once. +1 damage",
+              "cost": 13500,
+              "stats": {"damage": 4, "pierce": 33, "projectiles": 4}
+            },
+            {
+              "name": "Glaive Lord",
+              "description": "Orbiting glaives provide constant defense. +6 damage to thrown glaives",
+              "cost": 60000,
+              "stats": {"damage": 10, "pierce": 50, "projectiles": 4}
+            }
+          ]
+        },
+        "path2": {
+          "name": "Kylie Boomerang",
+          "description": "Boomerangs that don't return but travel further",
+          "upgrades": [
+            {
+              "name": "Faster Throwing",
+              "description": "Throws boomerangs 18% faster",
+              "cost": 200,
+              "stats": {"fire_rate": 1.39}
+            },
+            {
+              "name": "Faster Rangs",
+              "description": "Boomerangs fly faster and attack speed increased",
+              "cost": 290,
+              "stats": {"fire_rate": 1.67}
+            },
+            {
+              "name": "Kylie Boomerang",
+              "description": "Boomerang travels in straight line through all bloons. +1 damage, +27 pierce",
+              "cost": 1800,
+              "stats": {"damage": 2, "pierce": 30, "fire_rate": 1.67}
+            },
+            {
+              "name": "MOAB Domination",
+              "description": "Does extra damage to MOAB-class bloons. +8 damage vs MOABs",
+              "cost": 14000,
+              "stats": {"damage": 2, "pierce": 30, "fire_rate": 1.67}
+            },
+            {
+              "name": "MOAB Assassin",
+              "description": "Ability: Launches devastating attack against strongest bloon",
+              "cost": 25000,
+              "stats": {"damage": 5, "pierce": 200, "fire_rate": 1.67}
+            }
+          ]
+        },
+        "path3": {
+          "name": "Bionic Boomerang",
+          "description": "Technology-enhanced boomerangs with special abilities",
+          "upgrades": [
+            {
+              "name": "Long Range Rangs",
+              "description": "+8 range, +1 pierce",
+              "cost": 250,
+              "stats": {"range": 51, "pierce": 4}
+            },
+            {
+              "name": "Sonic Boom",
+              "description": "Boomerangs create sonic booms that stun bloons",
+              "cost": 800,
+              "stats": {"range": 51, "pierce": 6}
+            },
+            {
+              "name": "Red Hot Rangs",
+              "description": "Burning boomerangs can pop Lead Bloons. +1 damage",
+              "cost": 2400,
+              "stats": {"damage": 2, "range": 51, "pierce": 8}
+            },
+            {
+              "name": "Bionic Boomerang",
+              "description": "Bionic enhancement allows greater speed and power. +1 damage, faster attacks",
+              "cost": 16000,
+              "stats": {"damage": 3, "pierce": 12, "fire_rate": 2.0}
+            },
+            {
+              "name": "Turbo Charge",
+              "description": "Ability: Dramatically increases attack speed for a short time. +2 damage",
+              "cost": 32000,
+              "stats": {"damage": 5, "pierce": 18, "fire_rate": 2.5}
+            }
+          ]
+        }
+      }
+    },
+    "bomb_shooter": {
+      "name": "Bomb Shooter",
+      "description": "Shoots bombs that explode on impact",
+      "base_cost": 525,
+      "base_stats": {
+        "damage": 1,
+        "range": 45,
+        "fire_rate": 1.04,
+        "pierce": 40,
+        "blast_radius": 18
+      },
+      "icon_color": [105, 105, 105],
       "upgrade_paths": {
         "path1": {
           "name": "Bigger Bombs",
-          "description": "Increases explosion size and damage",
+          "description": "Larger explosions with more damage",
           "upgrades": [
             {
               "name": "Bigger Bombs",
-              "description": "+1 damage, +10 blast radius",
-              "cost": 500,
-              "stats": {"damage": 3, "blast_radius": 40}
+              "description": "+8 blast radius",
+              "cost": 400,
+              "stats": {"blast_radius": 26}
             },
             {
               "name": "Heavy Bombs",
-              "description": "+2 damage, +15 blast radius",
-              "cost": 1000,
-              "stats": {"damage": 5, "blast_radius": 55}
+              "description": "+1 damage, +10 pierce, can damage Black Bloons",
+              "cost": 650,
+              "stats": {"damage": 2, "pierce": 50, "blast_radius": 26}
             },
             {
               "name": "Really Big Bombs",
-              "description": "+3 damage, +20 blast radius",
+              "description": "+2 damage, +30 pierce, +10 blast radius",
               "cost": 2500,
-              "stats": {"damage": 8, "blast_radius": 75}
+              "stats": {"damage": 4, "pierce": 80, "blast_radius": 36}
             },
             {
-              "name": "Bomb Blitz",
-              "description": "+5 damage, chain explosions",
-              "cost": 6000,
-              "stats": {"damage": 13, "chain_explosions": 3}
+              "name": "Big One",
+              "description": "Huge explosion with massive damage. +15 damage, +100 pierce",
+              "cost": 18000,
+              "stats": {"damage": 19, "pierce": 180, "blast_radius": 50}
             },
             {
-              "name": "Bomb God",
-              "description": "+10 damage, massive explosions",
-              "cost": 15000,
-              "stats": {"damage": 23, "blast_radius": 120}
+              "name": "Big Bloon Sabotage",
+              "description": "Ability: Damages and slows all bloons on screen. +6 damage",
+              "cost": 25000,
+              "stats": {"damage": 25, "pierce": 300, "blast_radius": 70}
             }
           ]
         },
         "path2": {
           "name": "Missile Launcher",
-          "description": "Converts to guided missiles",
+          "description": "Guided missiles and faster attacks",
           "upgrades": [
             {
+              "name": "Faster Reload",
+              "description": "Reloads and shoots 18% faster",
+              "cost": 300,
+              "stats": {"fire_rate": 1.23}
+            },
+            {
               "name": "Missile Launcher",
-              "description": "Shoots guided missiles",
-              "cost": 600,
-              "stats": {"guided": true, "range": 120}
+              "description": "Shoots guided missiles instead of bombs. +15 range",
+              "cost": 700,
+              "stats": {"fire_rate": 1.23, "range": 60}
             },
             {
               "name": "MOAB Mauler",
-              "description": "+10 damage vs MOAB-class",
-              "cost": 1200,
-              "stats": {"moab_damage": 10}
-            },
-            {
-              "name": "Relentless Glue",
-              "description": "Slows bloons hit by explosions",
+              "description": "Extra damage to MOAB-class bloons. +17 damage vs MOABs",
               "cost": 3000,
-              "stats": {"slow_effect": 0.5}
+              "stats": {"damage": 1, "fire_rate": 1.23, "range": 60}
             },
             {
               "name": "MOAB Assassin",
-              "description": "Massive MOAB damage",
-              "cost": 7500,
-              "stats": {"moab_damage": 50}
+              "description": "Ability: Devastating attack against strongest MOAB-class bloon",
+              "cost": 14000,
+              "stats": {"damage": 3, "fire_rate": 1.5, "range": 60}
             },
             {
               "name": "MOAB Eliminator",
-              "description": "Can instantly destroy weak MOABs",
-              "cost": 18000,
-              "stats": {"moab_instakill": 0.1}
+              "description": "Much more powerful ability, regular attacks do more MOAB damage",
+              "cost": 30000,
+              "stats": {"damage": 5, "fire_rate": 2.0, "range": 75}
             }
           ]
         },
         "path3": {
           "name": "Cluster Bombs",
-          "description": "Bombs split into smaller explosions",
+          "description": "Bombs that split into smaller explosive fragments",
           "upgrades": [
             {
+              "name": "Extra Range",
+              "description": "+8 range",
+              "cost": 250,
+              "stats": {"range": 53}
+            },
+            {
+              "name": "Frag Bombs",
+              "description": "Bombs split into 8 fragments on explosion",
+              "cost": 700,
+              "stats": {"range": 53}
+            },
+            {
               "name": "Cluster Bombs",
-              "description": "Bombs split into 4 smaller bombs",
-              "cost": 450,
-              "stats": {"cluster_count": 4}
+              "description": "Main explosion spawns 8 smaller bombs. +1 damage to main explosion",
+              "cost": 2800,
+              "stats": {"damage": 2, "range": 53}
             },
             {
               "name": "Recursive Cluster",
-              "description": "Clusters split again",
-              "cost": 900,
-              "stats": {"cluster_count": 6, "recursive": true}
+              "description": "Cluster bombs spawn more cluster bombs. +1 damage",
+              "cost": 13500,
+              "stats": {"damage": 3, "range": 53}
             },
             {
-              "name": "Bomb Shooter",
-              "description": "+0.5 fire rate, more clusters",
-              "cost": 2200,
-              "stats": {"fire_rate": 1.3, "cluster_count": 8}
-            },
-            {
-              "name": "Phoenix Lord",
-              "description": "Fire bombs that leave burning ground",
-              "cost": 5500,
-              "stats": {"fire_damage": 5, "burn_duration": 3.0}
-            },
-            {
-              "name": "Wizard Lord Phoenix",
-              "description": "Ultimate fire transformation",
-              "cost": 14000,
-              "stats": {"fire_damage": 15, "phoenix_form": true}
-            }
-          ]
-        }
-      }
-    },
-    "ice_tower": {
-      "name": "Ice Tower",
-      "description": "Freezes bloons in place",
-      "base_cost": 250,
-      "base_stats": {
-        "damage": 0,
-        "range": 60,
-        "fire_rate": 2.0,
-        "freeze_duration": 1.5
-      },
-      "icon_color": [173, 216, 230],
-      "upgrade_paths": {
-        "path1": {
-          "name": "Stronger Freeze",
-          "description": "Improves freezing capabilities",
-          "upgrades": [
-            {
-              "name": "Enhanced Freeze",
-              "description": "+0.5 freeze duration, +10 range",
-              "cost": 200,
-              "stats": {"freeze_duration": 2.0, "range": 70}
-            },
-            {
-              "name": "Ice Shards",
-              "description": "+1 damage when bloons thaw",
-              "cost": 450,
-              "stats": {"thaw_damage": 1}
-            },
-            {
-              "name": "Metal Freeze",
-              "description": "Can freeze lead bloons",
-              "cost": 1100,
-              "stats": {"freeze_lead": true}
-            },
-            {
-              "name": "Snap Freeze",
-              "description": "+3 thaw damage, instant freeze",
-              "cost": 2800,
-              "stats": {"thaw_damage": 4, "instant_freeze": true}
-            },
-            {
-              "name": "Absolute Zero",
-              "description": "Permanent slow aura",
-              "cost": 7000,
-              "stats": {"permanent_slow": 0.3, "aura_range": 100}
-            }
-          ]
-        },
-        "path2": {
-          "name": "Damage Focus",
-          "description": "Adds damage to ice attacks",
-          "upgrades": [
-            {
-              "name": "Cold Snap",
-              "description": "+1 damage, slows unfrozen bloons",
-              "cost": 300,
-              "stats": {"damage": 1, "slow_effect": 0.2}
-            },
-            {
-              "name": "Ice Shards",
-              "description": "+2 damage, projectiles pierce",
-              "cost": 600,
-              "stats": {"damage": 3, "pierce": 3}
-            },
-            {
-              "name": "Blizzard",
-              "description": "+3 damage, area effect",
-              "cost": 1500,
-              "stats": {"damage": 6, "area_damage": true}
-            },
-            {
-              "name": "Snowstorm",
-              "description": "+5 damage, global slow",
-              "cost": 4000,
-              "stats": {"damage": 11, "global_slow": 0.1}
-            },
-            {
-              "name": "Ice Age",
-              "description": "+10 damage, screen-wide effect",
-              "cost": 10000,
-              "stats": {"damage": 21, "screen_effect": true}
-            }
-          ]
-        },
-        "path3": {
-          "name": "Arctic Wind",
-          "description": "Creates slowing wind effects",
-          "upgrades": [
-            {
-              "name": "Arctic Wind",
-              "description": "Constantly slows nearby bloons",
-              "cost": 350,
-              "stats": {"wind_slow": 0.15, "wind_range": 80}
-            },
-            {
-              "name": "Snowstorm",
-              "description": "+wind range, occasional freeze",
-              "cost": 700,
-              "stats": {"wind_range": 120, "freeze_chance": 0.1}
-            },
-            {
-              "name": "Blizzard",
-              "description": "Stronger wind, more freezing",
-              "cost": 1800,
-              "stats": {"wind_slow": 0.3, "freeze_chance": 0.2}
-            },
-            {
-              "name": "Absolute Zero",
-              "description": "Extreme cold effects",
-              "cost": 4500,
-              "stats": {"wind_slow": 0.5, "damage": 5}
-            },
-            {
-              "name": "Ice King",
-              "description": "Ultimate ice powers",
-              "cost": 11500,
-              "stats": {"wind_slow": 0.7, "damage": 15, "global_effect": true}
+              "name": "Bomb Blitz",
+              "description": "Ability triggers when bloons leak, massive recursive explosions. +2 damage",
+              "cost": 50000,
+              "stats": {"damage": 5, "pierce": 60, "range": 60}
             }
           ]
         }
@@ -491,8 +493,8 @@
   },
   "difficulty_multipliers": {
     "E": 1.0,
-    "M": 1.2,
-    "H": 1.5,
-    "I": 2.0
+    "M": 1.08,
+    "H": 1.2,
+    "I": 1.3
   }
 }
