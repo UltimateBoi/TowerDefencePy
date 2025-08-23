@@ -181,7 +181,7 @@ class TowerDefenseGame:
                         self.place_tower(mouse_pos)
     
     def place_tower(self, position: Tuple[int, int]):
-        if self.money >= TOWER_COST and self.game_map.can_place_tower(position):
+        if self.money >= TOWER_COST and self.game_map.can_place_tower(position, self.towers):
             self.towers.append(Tower(position))
             self.money -= TOWER_COST
     
@@ -247,6 +247,36 @@ class TowerDefenseGame:
         # Draw towers
         for tower in self.towers:
             tower.draw(self.screen)
+        
+        # Draw tower placement preview (when not paused and game not over)
+        if not self.paused and not self.game_over and self.money >= TOWER_COST:
+            mouse_pos = pygame.mouse.get_pos()
+            from .entities.tower import Tower
+            
+            # Check if we can place a tower at mouse position
+            can_place = self.game_map.can_place_tower(mouse_pos, self.towers)
+            
+            # Draw placement preview circle
+            if can_place:
+                # Green circle for valid placement
+                pygame.draw.circle(self.screen, (0, 255, 0, 100), mouse_pos, Tower.TOWER_RADIUS, 3)
+                pygame.draw.circle(self.screen, (0, 255, 0, 30), mouse_pos, Tower.TOWER_RADIUS)
+                # Show cost
+                cost_font = pygame.font.SysFont(None, 24)
+                cost_text = cost_font.render(f"${TOWER_COST}", True, (255, 255, 255))
+                cost_rect = cost_text.get_rect(center=(mouse_pos[0], mouse_pos[1] - Tower.TOWER_RADIUS - 15))
+                pygame.draw.rect(self.screen, (0, 0, 0, 128), cost_rect.inflate(4, 2))
+                self.screen.blit(cost_text, cost_rect)
+            else:
+                # Red circle for invalid placement
+                pygame.draw.circle(self.screen, (255, 0, 0, 100), mouse_pos, Tower.TOWER_RADIUS, 3)
+                pygame.draw.circle(self.screen, (255, 0, 0, 30), mouse_pos, Tower.TOWER_RADIUS)
+                # Show "Can't place" message
+                invalid_font = pygame.font.SysFont(None, 20)
+                invalid_text = invalid_font.render("Can't place here", True, (255, 255, 255))
+                invalid_rect = invalid_text.get_rect(center=(mouse_pos[0], mouse_pos[1] - Tower.TOWER_RADIUS - 15))
+                pygame.draw.rect(self.screen, (0, 0, 0, 128), invalid_rect.inflate(4, 2))
+                self.screen.blit(invalid_text, invalid_rect)
         
         # Draw bloons
         for bloon in self.bloons:

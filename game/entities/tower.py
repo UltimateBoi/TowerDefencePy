@@ -12,6 +12,8 @@ if TYPE_CHECKING:
 
 
 class Tower:
+    TOWER_RADIUS = 20 # Class constant for tower collision radius
+    
     def __init__(self, position: Tuple[int, int], range_val: int = 100, damage: int = 1, fire_rate: float = 1.0):
         self.position = position
         self.range = range_val
@@ -57,8 +59,8 @@ class Tower:
         return self.shoot(current_time)
     
     def draw(self, screen):
-        # Draw tower base
-        pygame.draw.circle(screen, BROWN, self.position, 20)
+        # Draw tower base (collision circle)
+        pygame.draw.circle(screen, BROWN, self.position, self.TOWER_RADIUS)
         # Draw cannon
         pygame.draw.circle(screen, GRAY, self.position, 15)
         

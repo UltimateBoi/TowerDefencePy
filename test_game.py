@@ -86,6 +86,39 @@ def test_game_map():
     assert game_map.end_point == (100, 100)
     print("✓ Game map test passed")
 
+def test_tower_placement_collision():
+    """Test tower placement collision detection"""
+    from game.entities.tower import Tower
+    
+    map_data = {
+        "path": [(50, 100), (150, 100), (250, 100)],
+        "spawn_point": (50, 100),
+        "end_point": (250, 100)
+    }
+    
+    game_map = GameMap(map_data)
+    towers = []
+    
+    # Test valid placement away from path
+    assert game_map.can_place_tower((200, 200), towers)
+    
+    # Test invalid placement on path
+    assert not game_map.can_place_tower((100, 100), towers)
+    
+    # Test invalid placement near spawn point
+    assert not game_map.can_place_tower((50, 100), towers)
+    
+    # Place a tower and test collision with existing towers
+    towers.append(Tower((200, 200)))
+    
+    # Test valid placement away from existing tower
+    assert game_map.can_place_tower((300, 300), towers)
+    
+    # Test invalid placement too close to existing tower
+    assert not game_map.can_place_tower((210, 210), towers)
+    
+    print("✓ Tower placement collision test passed")
+
 def run_all_tests():
     """Run all tests"""
     print("Running Tower Defense Game Tests...")
@@ -98,6 +131,7 @@ def run_all_tests():
         test_projectile_collision()
         test_wave_spawning()
         test_game_map()
+        test_tower_placement_collision()
         
         print("=" * 40)
         print("✓ All tests passed! The game mechanics are working correctly.")
