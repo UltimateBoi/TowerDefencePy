@@ -1,5 +1,39 @@
 # Tower Defense Game - Changelog
 
+## Version 2.1.0 - August 23, 2025
+
+### Major Features
+
+#### Tower Placement Collision Detection System
+**Date**: August 23, 2025  
+**Files**: `game/systems/game_map.py`, `game/entities/tower.py`, `game/tower_defense_game.py`, `test_game.py`
+
+Enhanced tower placement with comprehensive collision detection and visual feedback:
+
+**Collision Detection Features**:
+- **Path Protection**: Towers cannot be placed on the track or within buffer zone
+- **Tower Spacing**: Prevents overlapping towers using 40-pixel minimum distance
+- **Boundary Validation**: Ensures towers stay within screen bounds
+- **Spawn/End Protection**: Maintains safe distance from start and end points
+
+**Visual Feedback System**:
+- Real-time placement preview with green/red indicators
+- Cost display for valid placements ($10 with tower info)
+- "Can't place here" message for invalid locations
+- Semi-transparent circle overlay with thick borders
+
+**Technical Implementation**:
+- Mathematical point-to-line distance calculation for path collision
+- Circle-based collision detection using Euclidean distance
+- Tower radius constant (20 pixels) for consistent collision boundaries
+- Efficient O(n) algorithms with minimal performance impact
+
+**User Experience Improvements**:
+- Professional-grade placement system matching commercial tower defense games
+- Instant visual feedback prevents placement errors
+- Clear communication of placement restrictions and costs
+- Enhanced game balance through strategic tower positioning
+
 ## Version 2.0.0 - August 21, 2025
 
 ### Major Features
