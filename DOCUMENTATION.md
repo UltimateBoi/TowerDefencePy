@@ -1,11 +1,13 @@
 # Tower Defense Game - Complete Implementation Documentation
 
 ## Overview
+
 A fully functional tower defense game inspired by Bloons TD6, implemented using Python and Pygame. The game includes all core gameplay mechanics with smooth 60 FPS performance.
 
 ## Implementation Status ✅ COMPLETE
 
 ### Main Menu ✅
+
 - [x] Title text
 - [x] Start button (launches game)
 - [x] Towers button (placeholder)
@@ -14,6 +16,7 @@ A fully functional tower defense game inspired by Bloons TD6, implemented using 
 - [x] Background image support
 
 ### Core Game Features ✅
+
 - [x] Main game loop running at 60 FPS
 - [x] Map loading from JSON files
 - [x] Bloon spawning and movement system
@@ -24,6 +27,7 @@ A fully functional tower defense game inspired by Bloons TD6, implemented using 
 - [x] Game over conditions
 
 ### Game UI ✅
+
 - [x] Cash display
 - [x] Lives counter
 - [x] Wave number indicator
@@ -32,6 +36,7 @@ A fully functional tower defense game inspired by Bloons TD6, implemented using 
 - [x] Game over screen
 
 ### Game Mechanics ✅
+
 - [x] Tower selection menu (click to place)
 - [x] Map rendering with path visualization
 - [x] Wave spawning logic with different bloon types
@@ -42,6 +47,7 @@ A fully functional tower defense game inspired by Bloons TD6, implemented using 
 ## Technical Implementation Details
 
 ### Classes Implemented
+
 1. **BloonType (Enum)**: Defines bloon varieties
 2. **BloonProperties (Dataclass)**: Bloon statistics
 3. **Bloon**: Moving enemies with health and path following
@@ -53,6 +59,7 @@ A fully functional tower defense game inspired by Bloons TD6, implemented using 
 9. **TowerDefenseGame**: Main game controller
 
 ### Game Balance
+
 - **Starting Resources**: $50 money, 20 lives
 - **Tower Cost**: $10 per tower
 - **Tower Stats**: 100 range, 1 damage, 1 shot/second
@@ -60,17 +67,20 @@ A fully functional tower defense game inspired by Bloons TD6, implemented using 
 - **Wave Progression**: 4 waves with increasing challenge
 
 ### Performance Features
+
 - 60 FPS target with pygame.Clock
 - Efficient object management and cleanup
 - Optimized collision detection
 - Memory-conscious projectile handling
 
 ### Controls
+
 - **Left Click**: Place tower
 - **SPACE**: Start next wave
 - **ESC**: Quit game
 
 ## File Structure
+
 ```
 TowerDefencePy/
 ├── __main__.py        # Entry point
@@ -84,7 +94,9 @@ TowerDefencePy/
 ```
 
 ## Testing Results ✅
+
 All core mechanics tested and verified:
+
 - ✅ Bloon creation and properties
 - ✅ Bloon movement along paths
 - ✅ Tower targeting system
@@ -95,33 +107,40 @@ All core mechanics tested and verified:
 ## Development Process Log
 
 ### Phase 1: Foundation Setup
+
 - Set up pygame environment
 - Created main menu with UI components
 - Implemented text and button utilities
 
 ### Phase 2: Core Game Architecture
+
 - Designed class structure for game entities
 - Implemented bloon types with properties
 - Created path-following movement system
 
 ### Phase 3: Tower and Combat System
+
 - Built tower placement and targeting
 - Implemented projectile physics
 - Added collision detection and damage
 
 ### Phase 4: Game Flow and Waves
+
 - Created wave management system
 - Implemented progressive difficulty
 - Added game state transitions
 
 ### Phase 5: Polish and Testing
+
 - Added comprehensive UI elements
 - Created unit test suite
 - Optimized performance to 60 FPS
 - Documentation and user guide
 
 ## Future Enhancement Opportunities
+
 While the core game is complete and fully functional:
+
 - Assets for towers
 - Tower panel
 - Clean and enhance UI in game

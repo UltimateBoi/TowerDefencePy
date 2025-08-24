@@ -5,30 +5,35 @@
 ### Major Features
 
 #### Tower Placement Collision Detection System
+
 **Date**: August 23, 2025  
 **Files**: `game/systems/game_map.py`, `game/entities/tower.py`, `game/tower_defense_game.py`, `test_game.py`
 
 Enhanced tower placement with comprehensive collision detection and visual feedback:
 
 **Collision Detection Features**:
+
 - **Path Protection**: Towers cannot be placed on the track or within buffer zone
 - **Tower Spacing**: Prevents overlapping towers using 40-pixel minimum distance
 - **Boundary Validation**: Ensures towers stay within screen bounds
 - **Spawn/End Protection**: Maintains safe distance from start and end points
 
 **Visual Feedback System**:
+
 - Real-time placement preview with green/red indicators
 - Cost display for valid placements ($10 with tower info)
 - "Can't place here" message for invalid locations
 - Semi-transparent circle overlay with thick borders
 
 **Technical Implementation**:
+
 - Mathematical point-to-line distance calculation for path collision
 - Circle-based collision detection using Euclidean distance
 - Tower radius constant (20 pixels) for consistent collision boundaries
 - Efficient O(n) algorithms with minimal performance impact
 
 **User Experience Improvements**:
+
 - Professional-grade placement system matching commercial tower defense games
 - Instant visual feedback prevents placement errors
 - Clear communication of placement restrictions and costs
@@ -36,9 +41,10 @@ Enhanced tower placement with comprehensive collision detection and visual feedb
 
 ## Version 2.0.0 - August 21, 2025
 
-### Major Features
+### New Features
 
 #### BTD6 Tower System Implementation
+
 **Date**: August 21, 2025  
 **Files**: `data/towers.json`, `game/ui/tower_upgrades_screen.py`
 
@@ -50,16 +56,19 @@ Complete replacement of the tower system with authentic BTD6 towers:
 - **Bomb Shooter** (was Bomb Tower): $525 base cost, explosive area damage
 
 **Technical Changes**:
+
 - 60 total upgrades with authentic BTD6 names and costs
 - Updated difficulty multipliers: Easy (1.0x), Medium (1.08x), Hard (1.2x), Impoppable (1.3x)
 - Added new stats: blast_radius, projectiles, enhanced pierce values
 - Maintained JSON structure for backward compatibility
 
 #### Comprehensive Text Rendering System
+
 **Date**: August 21, 2025  
 **Files**: `game/ui/text_renderer.py`, `utils/TextUtil.py`
 
 New TextRenderer class with advanced capabilities:
+
 - Automatic text wrapping with word boundary detection
 - Alignment options: LEFT, CENTER, RIGHT (horizontal), TOP, MIDDLE, BOTTOM (vertical)
 - Line spacing control and maximum line limits
@@ -67,15 +76,18 @@ New TextRenderer class with advanced capabilities:
 - Background rendering with rounded rectangles
 
 **Backward Compatibility**:
+
 - Legacy TextUtil maintained for existing code
 - Enhanced with new wrap_text() and render_wrapped_text() methods
 - Graceful fallbacks for missing dependencies
 
 #### Tower Upgrades Interface
+
 **Date**: August 21, 2025  
 **Files**: `game/ui/tower_upgrades_screen.py`
 
 Enhanced UI with text overflow fixes:
+
 - Multi-line tower names (fixes "Boomerang Monkey" overflow)
 - Wrapped upgrade descriptions and path descriptions
 - Improved layout spacing and alignment
@@ -84,40 +96,48 @@ Enhanced UI with text overflow fixes:
 ### Bug Fixes
 
 #### Text Overflow Resolution
+
 **Date**: August 21, 2025
 
 Fixed text overflow issues across all UI components:
+
 - Tower card names now wrap to multiple lines when needed
 - Upgrade descriptions automatically wrap within their containers
 - Path descriptions use center-aligned text wrapping
 - Base statistics display with proper formatting
 
 **Implementation Details**:
+
 - Smart line breaking at word boundaries
 - Dynamic layout adjustment based on text length
 - Fallback handling for edge cases (single long words)
 
 ### Auto Start Feature
+
 **Date**: August 21, 2025  
 **Files**: `game/ui/settings_screen.py`
 
 Added automatic round starting capability:
+
 - Toggle switch in settings menu
 - Configurable delay between rounds
 - Persistent settings storage
 - User-friendly interface integration
 
 ### UI Layout Improvements
+
 **Date**: August 21, 2025  
 **Files**: `game/ui/tower_upgrades_screen.py`, `game/ui/pause_menu.py`, `game/ui/settings_screen.py`
 
 Fixed overflow issues across multiple interface panels:
-- **Tower Upgrades Screen**: Expanded left sidebar from 300px to 380px width
+
+- **Tower Upgrades Screen**: Expanded left sidebar from 300px to 330px width
 - **Pause Menu**: Increased height from 350px to 400px to fit all buttons
 - **Settings Menu**: Expanded width from 500px to 600px for auto start feature text
 - **Panel Spacing**: Optimized spacing between left tower panel (15px gap) and right upgrade panel
 
 **Layout Adjustments**:
+
 - Better visual balance between UI components
 - Proper text fitting without overflow
 - Improved button spacing and alignment
@@ -126,18 +146,21 @@ Fixed overflow issues across multiple interface panels:
 ### Technical Improvements
 
 #### Code Architecture
+
 - Enhanced type safety with comprehensive type hints
 - Enum-based alignment constants for consistency
 - Modular text rendering components
 - Clean separation between rendering and layout logic
 
 #### Testing & Validation
+
 - All unit tests pass with no regressions
 - Application launches successfully
 - Visual validation of text rendering improvements
 - BTD6 authenticity verification completed
 
 #### Performance Optimizations
+
 - Efficient text wrapping algorithms
 - Minimal surface creation and memory usage
 - Smart caching of text calculations
@@ -146,6 +169,7 @@ Fixed overflow issues across multiple interface panels:
 ### Documentation
 
 #### New Documentation Files
+
 - `BTD6_TOWER_SYSTEM_UPDATE.md`: Detailed tower specifications
 - `RECENT_ENHANCEMENTS.md`: Comprehensive feature overview
 - `TOWER_CARD_TEXT_FIX.md`: Text overflow fix documentation
@@ -155,10 +179,12 @@ Fixed overflow issues across multiple interface panels:
 ### Version 1.5.0 - August 2025
 
 #### Pause System Implementation
+
 **Date**: August 2025  
 **Files**: `game/ui/pause_menu.py`
 
 Complete pause and settings functionality:
+
 - **Pause Menu**: Accessible via ESC key or settings gear icon
 - **Menu Options**: Resume, Main Menu, Quit Game
 - **Settings Icon**: Animated gear icon in top-right corner
@@ -166,6 +192,7 @@ Complete pause and settings functionality:
 - **Visual Indicators**: "PAUSED" text in HUD, input blocking during pause
 
 **Technical Features**:
+
 - Semi-transparent overlay with centered modal dialog
 - Three action buttons with hover states
 - Click detection and proper action handling
@@ -174,12 +201,14 @@ Complete pause and settings functionality:
 ### Version 1.4.0 - August 2025
 
 #### Code Architecture Refactoring
+
 **Date**: August 2025  
 **Files**: Multiple files restructured
 
 Major codebase reorganization from monolithic to modular structure:
 
 **New Package Structure**:
+
 - `game/` - Main game package with proper module organization
 - `game/entities/` - Game entity classes (Bloon, Tower, Projectile)
 - `game/systems/` - Game system classes (Wave, GameMap)
@@ -187,18 +216,21 @@ Major codebase reorganization from monolithic to modular structure:
 - `game/constants.py` - Game constants and configuration
 
 **Benefits Achieved**:
+
 - **Modularity**: Each class in its own file with clear responsibility
 - **Maintainability**: Cleaner code organization and easier modifications
 - **Scalability**: Simple structure for adding new features and entity types
 - **Reusability**: Better component separation for future development
 
 **Technical Improvements**:
+
 - Proper import structure and package organization
 - Separated concerns between entities, systems, and UI
 - Enhanced test structure for modular components
 - Maintained backward compatibility during transition
 
 ### Version 1.x
+
 - Basic tower defense mechanics
 - Simple tower and bloon systems
 - Core game loop implementation
