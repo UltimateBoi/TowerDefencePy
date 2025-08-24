@@ -12,6 +12,14 @@ if TYPE_CHECKING:
 
 class Projectile:
     def __init__(self, start_pos: Tuple[float, float], target: 'Bloon', damage: int, speed: float = 5.0):
+        """Initialize the projectile with the given parameters.
+
+        Args:
+            start_pos (Tuple[float, float]): The starting position of the projectile.
+            target (Bloon): The target bloon.
+            damage (int): The damage dealt by the projectile.
+            speed (float, optional): The speed of the projectile. Defaults to 5.0.
+        """
         self.position = [float(start_pos[0]), float(start_pos[1])]
         self.target = target
         self.damage = damage

@@ -9,10 +9,10 @@ import os
 from typing import Tuple
 
 # Add the game directory to the path for imports
-sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'game'))
+sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 
 try:
-    from ui.text_renderer import TextRenderer, TextAlignment, VerticalAlignment
+    from game.ui.text_renderer import TextRenderer, TextAlignment, VerticalAlignment
 except ImportError:
     # Fallback if new system is not available
     TextRenderer = None
@@ -29,9 +29,17 @@ class TextUtil:
 
     @staticmethod
     def draw_string(screen: pygame.Surface, font: pygame.font.Font, text: str, color: Tuple[int, int, int], x: int, y: int):
+        """Draws a string on the screen centered at the specified position.
+
+        Args:
+            screen (pygame.Surface): The surface to draw on.
+            font (pygame.font.Font): The font to use for the text.
+            text (str): The text to draw.
+            color (Tuple[int, int, int]): The color of the text.
+            x (int): The x-coordinate of the center of the text.
+            y (int): The y-coordinate of the center of the text.
         """
-        Draws a string on the screen centered at the specified position.
-        """
+        
         text_surface = font.render(text, True, color)
         text_rect = text_surface.get_rect(center=(x, y)) # Center the text
         screen.blit(text_surface, text_rect)
@@ -48,9 +56,21 @@ class TextUtil:
         padding: int = 12, 
         border_radius: int = 16
     ):
+        """Draws text centered inside a rounded rectangle background at (x, y) (top-left of rect).
+
+        Args:
+            screen (pygame.Surface): The surface to draw on.
+            text (str): The text to draw.
+            font (pygame.font.Font): The font to use for the text.
+            rect_color (Tuple[int, int, int]): The color of the rectangle background.
+            text_color (Tuple[int, int, int]): The color of the text.
+            x (int): The x-coordinate of the top-left corner of the rectangle.
+            y (int): The y-coordinate of the top-left corner of the rectangle.
+            padding (int, optional): The padding around the text. Defaults to 12.
+            border_radius (int, optional): The border radius of the rounded rectangle. Defaults to 16.
+
         """
-        Draws text centered inside a rounded rectangle background at (x, y) (top-left of rect).
-        """
+        
         if TextRenderer:
             # Use new system if available
             text_surface = font.render(text, True, text_color)
@@ -80,7 +100,18 @@ class TextUtil:
         border_radius: int = 16, 
         blur_radius: int = 3
     ):
-        """
+        """Draws text with a blurred rounded rectangle background.
+
+        Args:
+            screen (pygame.Surface): The surface to draw on.
+            text (str): The text to draw.
+            font (pygame.font.Font): The font to use for the text.
+            x (int): The x-coordinate of the top-left corner of the text.
+            y (int): The y-coordinate of the top-left corner of the text.
+            padding (int, optional): The padding around the text. Defaults to 12.
+            border_radius (int, optional): The border radius of the rounded rectangle. Defaults to 16.
+            blur_radius (int, optional): The blur radius for the background. Defaults to 3.
+        
         Draws text centered inside a blurred rounded rectangle background at (x, y) (top-left of rect).
         The blur is only behind the text, with proper rounded corners and tight sizing.
         
@@ -128,10 +159,20 @@ class TextUtil:
 
     @staticmethod
     def wrap_text(text: str, font: pygame.font.Font, max_width: int) -> list:
-        """
+        """Wrap text to fit within a specified width.
+
+        Args:
+            text (str): The text to wrap.
+            font (pygame.font.Font): The font to use for measuring text width.
+            max_width (int): The maximum width of the wrapped text.
+
+        Returns:
+            list: A list of wrapped text lines.
+            
         Wrap text to fit within a specified width
         New utility method that delegates to the enhanced text renderer
         """
+        
         if TextRenderer:
             return TextRenderer.wrap_text(text, font, max_width)
         else:
@@ -165,10 +206,23 @@ class TextUtil:
         rect: pygame.Rect, 
         center: bool = False
     ) -> int:
-        """
+        """Render wrapped text within a rectangle.
+
+        Args:
+            surface (pygame.Surface): The surface to render the text on.
+            text (str): The text to render.
+            font (pygame.font.Font): The font to use for rendering the text.
+            color (Tuple[int, int, int]): The color of the text.
+            rect (pygame.Rect): The rectangle to render the text within.
+            center (bool, optional): Whether to center the text vertically. Defaults to False.
+
+        Returns:
+            int: The height of the rendered text.
+
         Render wrapped text within a rectangle
         New utility method for enhanced text rendering
         """
+        
         if TextRenderer:
             alignment = TextAlignment.CENTER if center else TextAlignment.LEFT
             return TextRenderer.render_wrapped_text(

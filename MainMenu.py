@@ -64,7 +64,7 @@ def main_menu():
     start_x = (SCREEN_WIDTH - total_width) // 2
     y_pos = SCREEN_HEIGHT - 100
 
-    button_color = (0, 177, 47) # #00B12F
+    button_color = (0, 177, 47) #00B12F
     # Buttons with rounded corners and spacing
     start_button = TextButton("start", start_x, y_pos, button_width, button_height, "Start", radius=button_radius, color=button_color)
     towers_button = TextButton("towers", start_x + button_width + button_spacing, y_pos, button_width, button_height, "Towers", radius=button_radius, color=button_color)

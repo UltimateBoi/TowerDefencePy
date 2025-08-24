@@ -10,6 +10,12 @@ from ..constants import BLACK, GREEN
 
 class Bloon:
     def __init__(self, bloon_type: BloonType, path: List[Tuple[int, int]]):
+        """Initialize the bloon with the given type and path.
+
+        Args:
+            bloon_type (BloonType): The type of the bloon.
+            path (List[Tuple[int, int]]): The path the bloon will follow.
+        """
         self.type = bloon_type
         self.properties = BLOON_PROPERTIES[bloon_type]
         self.health = self.properties.health

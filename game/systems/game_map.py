@@ -9,6 +9,11 @@ from ..constants import BROWN, GREEN, RED
 
 class GameMap:
     def __init__(self, map_data: dict):
+        """Initialize the game map with the given map data.
+
+        Args:
+            map_data (dict): The map data containing path, spawn point, end point, and placeable areas.
+        """
         self.path = map_data.get("path", [])
         self.spawn_point = map_data.get("spawn_point", (50, 360))
         self.end_point = map_data.get("end_point", (1230, 360))

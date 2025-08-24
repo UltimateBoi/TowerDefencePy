@@ -15,6 +15,14 @@ class Tower:
     TOWER_RADIUS = 20 # Class constant for tower collision radius
     
     def __init__(self, position: Tuple[int, int], range_val: int = 100, damage: int = 1, fire_rate: float = 1.0):
+        """Initialize the tower with the given parameters.
+
+        Args:
+            position (Tuple[int, int]): The position of the tower.
+            range_val (int, optional): The attack range of the tower. Defaults to 100.
+            damage (int, optional): The damage dealt by the tower. Defaults to 1.
+            fire_rate (float, optional): The fire rate of the tower (shots per second). Defaults to 1.0.
+        """
         self.position = position
         self.range = range_val
         self.damage = damage
@@ -59,10 +67,20 @@ class Tower:
         return self.shoot(current_time)
     
     def draw(self, screen):
+        # Draw range circle with semi-transparent fill and thick outline (BTD6 style)
+        # Create a surface for the semi-transparent range circle
+        range_surface = pygame.Surface((self.range * 2, self.range * 2), pygame.SRCALPHA)
+        
+        # Draw semi-transparent fill (light gray with 30% opacity)
+        pygame.draw.circle(range_surface, (128, 128, 128, 77), (self.range, self.range), self.range)
+        
+        # Blit the semi-transparent surface to the main screen
+        screen.blit(range_surface, (self.position[0] - self.range, self.position[1] - self.range))
+        
+        # Draw thick outline (3 pixels thick, darker gray)
+        pygame.draw.circle(screen, (96, 96, 96), self.position, self.range, 3)
+        
         # Draw tower base (collision circle)
         pygame.draw.circle(screen, BROWN, self.position, self.TOWER_RADIUS)
         # Draw cannon
         pygame.draw.circle(screen, GRAY, self.position, 15)
-        
-        # Draw range circle when selected (for now, always show)
-        pygame.draw.circle(screen, (128, 128, 128, 50), self.position, self.range, 1)

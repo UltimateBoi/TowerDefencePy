@@ -11,6 +11,15 @@ class GameUI:
         self.small_font = pygame.font.SysFont(None, 24)
         
     def draw(self, screen, money: int, lives: int, wave_number: int, paused: bool = False):
+        """Draw the game UI elements.
+
+        Args:
+            screen (pygame.Surface): The surface to draw the UI on.
+            money (int): The current amount of money.
+            lives (int): The current number of lives.
+            wave_number (int): The current wave number.
+            paused (bool, optional): Whether the game is paused. Defaults to False.
+        """
         # Draw money
         money_text = self.font.render(f"Money: ${money}", True, WHITE)
         screen.blit(money_text, (10, 10))
