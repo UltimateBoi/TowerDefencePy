@@ -4,6 +4,7 @@ Main Tower Defense Game class
 import pygame
 import json
 import subprocess
+import math
 from typing import List, Tuple, Optional
 
 # Import game constants
@@ -23,6 +24,9 @@ from .systems.wave import Wave
 from .systems.game_map import GameMap
 from .ui.game_ui import GameUI
 from .ui.pause_menu import PauseMenu, SettingsIcon, SettingsMenu
+from .ui.ingame_upgrade_panel import InGameUpgradePanel
+from .ui.tower_selection_panel import TowerSelectionPanel
+from .ui.mode_selection import GameModeSelection
 
 
 def get_git_commit_hash():
@@ -78,8 +82,23 @@ class TowerDefenseGame:
         self.ui = GameUI()
         self.pause_menu = PauseMenu()
         self.settings_menu = SettingsMenu()
+        self.mode_selection = GameModeSelection()
+        
+        # Tower selection and upgrade system
+        self.selected_tower: Optional[Tower] = None
+        self.upgrade_panel = InGameUpgradePanel(SCREEN_WIDTH - 320, 100)
+        self.tower_selection_panel = TowerSelectionPanel()
         self.settings_icon = SettingsIcon()
-        self.current_menu = "none" # Track which menu is open: "none", "pause", "settings"
+        self.current_menu = "none" # Track which menu is open: "none", "pause", "settings", "mode_selection"
+        
+        # Game mode settings
+        self.game_mode = "normal" # "normal" or "sandbox"
+        self.sandbox_mode = False
+        self.sandbox_bloon_type = BloonType.RED # Default bloon type for sandbox spawning
+        
+        # Drag and drop state
+        self.dragging_tower = False
+        self.drag_start_pos = None
         
     def load_map(self):
         # Default map data
@@ -140,10 +159,18 @@ class TowerDefenseGame:
                         self.paused = True
                 elif event.key == pygame.K_SPACE and not self.wave_active and not self.paused:
                     self.start_wave()
+                elif event.key == pygame.K_t and not self.paused:
+                    # Toggle tower selection panel visibility
+                    self.tower_selection_panel.visible = not self.tower_selection_panel.visible
+                elif event.key == pygame.K_b and self.sandbox_mode and not self.paused:
+                    # Cycle through bloon types in sandbox mode
+                    bloon_types = [BloonType.RED, BloonType.BLUE, BloonType.GREEN, BloonType.YELLOW]
+                    current_index = bloon_types.index(self.sandbox_bloon_type)
+                    self.sandbox_bloon_type = bloon_types[(current_index + 1) % len(bloon_types)]
             elif event.type == pygame.MOUSEBUTTONDOWN:
+                mouse_pos = pygame.mouse.get_pos()
+                
                 if event.button == 1: # Left click
-                    mouse_pos = pygame.mouse.get_pos()
-                    
                     # Handle settings menu clicks
                     if self.current_menu == "settings":
                         action = self.settings_menu.handle_click(mouse_pos)
@@ -153,6 +180,29 @@ class TowerDefenseGame:
                             self.current_menu = "pause"
                         elif action == "toggle_auto_start":
                             self.auto_start_rounds = self.settings_menu.auto_start_rounds
+                        elif action == "toggle_placement_mode":
+                            # Placement mode changed, deselect any current tower selection
+                            self.tower_selection_panel.deselect_tower()
+                    # Handle mode selection clicks
+                    elif self.current_menu == "mode_selection":
+                        action = self.mode_selection.handle_click(mouse_pos)
+                        if action == "normal_mode":
+                            self.mode_selection.hide()
+                            self.current_menu = "none"
+                            self.game_mode = "normal"
+                            self.sandbox_mode = False
+                        elif action == "sandbox_mode":
+                            self.mode_selection.hide()
+                            self.current_menu = "none"
+                            self.game_mode = "sandbox"
+                            self.sandbox_mode = True
+                            # Set sandbox mode properties
+                            self.money = 999999 # Infinite money
+                            self.lives = 999999 # Infinite lives
+                        elif action == "back":
+                            self.mode_selection.hide()
+                            self.current_menu = "none"
+                            return # Return to main menu
                     # Handle pause menu clicks
                     elif self.current_menu == "pause":
                         action = self.pause_menu.handle_click(mouse_pos)
@@ -178,12 +228,132 @@ class TowerDefenseGame:
                         self.paused = True
                     # Handle tower placement (only when not paused)
                     elif not self.paused:
-                        self.place_tower(mouse_pos)
+                        # First check if clicking on tower selection panel
+                        selected_tower_id = self.tower_selection_panel.handle_click(mouse_pos, self.money)
+                        if selected_tower_id:
+                            # Tower type selected
+                            if self.settings_menu.drag_drop_placement:
+                                # Start drag mode
+                                self.dragging_tower = True
+                                self.drag_start_pos = mouse_pos
+                            # For click mode, tower is selected and ready for placement on next click
+                        # Check if clicking on upgrade panel
+                        elif self.upgrade_panel.visible and self.upgrade_panel.rect.collidepoint(mouse_pos):
+                            money_spent = self.upgrade_panel.handle_click(mouse_pos, self.money)
+                            self.money -= money_spent
+                        else:
+                            # Check if clicking on existing tower for selection
+                            clicked_tower = None
+                            for tower in self.towers:
+                                if tower.is_clicked(mouse_pos):
+                                    clicked_tower = tower
+                                    break
+                            
+                            if clicked_tower:
+                                # Check if clicking on already selected tower
+                                if clicked_tower == self.selected_tower:
+                                    # Deselect the clicked tower
+                                    clicked_tower.selected = False
+                                    self.selected_tower = None
+                                    self.upgrade_panel.set_selected_tower(None)
+                                else:
+                                    # Select a different tower - deselect all first
+                                    for tower in self.towers:
+                                        tower.selected = False
+                                    # Select the clicked tower
+                                    clicked_tower.selected = True
+                                    self.selected_tower = clicked_tower
+                                    self.upgrade_panel.set_selected_tower(clicked_tower)
+                                    # Deselect tower type selection
+                                    self.tower_selection_panel.deselect_tower()
+                            else:
+                                # No tower clicked, try to place new tower (click mode only)
+                                if (not self.settings_menu.drag_drop_placement and 
+                                    self.tower_selection_panel.selected_tower_id):
+                                    self.place_tower(mouse_pos)
+                                # Deselect all towers when placing new one
+                                for tower in self.towers:
+                                    tower.selected = False
+                                self.selected_tower = None
+                                self.upgrade_panel.set_selected_tower(None)
+                        
+                        # Handle sandbox mode bloon spawning
+                        if self.sandbox_mode and not self.tower_selection_panel.selected_tower_id:
+                            # Check if click is on the game map (not on UI)
+                            game_area_rect = pygame.Rect(0, 0, SCREEN_WIDTH - 320, SCREEN_HEIGHT) # Exclude UI panels
+                            if game_area_rect.collidepoint(mouse_pos):
+                                self.spawn_bloon(mouse_pos)
+                
+                elif event.button == 3: # Right click - deselect
+                    if not self.paused and not self.game_over:
+                        # Deselect tower type selection
+                        self.tower_selection_panel.deselect_tower()
+                        # Deselect any selected towers
+                        for tower in self.towers:
+                            tower.selected = False
+                        self.selected_tower = None
+                        self.upgrade_panel.set_selected_tower(None)
+                        
+            elif event.type == pygame.MOUSEBUTTONUP:
+                if event.button == 1 and self.dragging_tower: # Left click release in drag mode
+                    mouse_pos = pygame.mouse.get_pos()
+                    if not self.paused and not self.game_over:
+                        # Place tower at release position
+                        if self.tower_selection_panel.selected_tower_id:
+                            self.place_tower(mouse_pos)
+                    self.dragging_tower = False
+                    self.drag_start_pos = None
     
     def place_tower(self, position: Tuple[int, int]):
-        if self.money >= TOWER_COST and self.game_map.can_place_tower(position, self.towers):
-            self.towers.append(Tower(position))
-            self.money -= TOWER_COST
+        selected_tower_id = self.tower_selection_panel.selected_tower_id
+        if not selected_tower_id:
+            return # No tower type selected
+        
+        tower_cost = self.tower_selection_panel.get_tower_cost(selected_tower_id)
+        
+        if self.money >= tower_cost and self.game_map.can_place_tower(position, self.towers):
+            # Get tower stats from data
+            tower_data = self.tower_selection_panel.get_selected_tower_data()
+            if tower_data:
+                base_stats = tower_data.get('base_stats', {})
+                range_val = base_stats.get('range', 32) * 3 # Scale up range for gameplay
+                damage = base_stats.get('damage', 1)
+                fire_rate = base_stats.get('fire_rate', 0.95)
+                
+                # Create tower with proper stats
+                self.towers.append(Tower(
+                    position, 
+                    range_val=range_val, 
+                    damage=damage, 
+                    fire_rate=fire_rate,
+                    tower_type=selected_tower_id
+                ))
+                self.money -= tower_cost
+    
+    def spawn_bloon(self, position: Tuple[int, int], bloon_type: BloonType = None):
+        """Spawn a bloon at the given position in sandbox mode"""
+        if bloon_type is None:
+            bloon_type = self.sandbox_bloon_type
+            
+        # Find the closest point on the path to the clicked position
+        closest_index = 0
+        min_distance = float('inf')
+        
+        for i, path_point in enumerate(self.game_map.path):
+            dx = path_point[0] - position[0]
+            dy = path_point[1] - position[1]
+            distance = math.sqrt(dx * dx + dy * dy)
+            if distance < min_distance:
+                min_distance = distance
+                closest_index = i
+        
+        # Create a custom path starting from the clicked position to the closest path point,
+        # then continue with the rest of the path
+        custom_path = [position] + self.game_map.path[closest_index:]
+        
+        # Create and add the bloon
+        new_bloon = Bloon(bloon_type, custom_path)
+        self.bloons.append(new_bloon)
     
     def update(self):
         if self.game_over or self.paused:
@@ -239,6 +409,11 @@ class TowerDefenseGame:
             if not bloon.alive:
                 self.money += bloon.reward
                 self.bloons.remove(bloon)
+        
+        # Update tower selection panel hover state
+        if not self.paused and not self.game_over:
+            mouse_pos = pygame.mouse.get_pos()
+            self.tower_selection_panel.handle_hover(mouse_pos)
     
     def draw(self):
         # Draw map
@@ -248,35 +423,19 @@ class TowerDefenseGame:
         for tower in self.towers:
             tower.draw(self.screen)
         
-        # Draw tower placement preview (when not paused and game not over)
-        if not self.paused and not self.game_over and self.money >= TOWER_COST:
+        # Draw tower placement preview using tower selection panel
+        if not self.paused and not self.game_over:
             mouse_pos = pygame.mouse.get_pos()
-            from .entities.tower import Tower
+            self.tower_selection_panel.draw_placement_preview(self.screen, mouse_pos, self.game_map, self.towers, self.money)
             
-            # Check if we can place a tower at mouse position
-            can_place = self.game_map.can_place_tower(mouse_pos, self.towers)
-            
-            # Draw placement preview circle
-            if can_place:
-                # Green circle for valid placement
-                pygame.draw.circle(self.screen, (0, 255, 0, 100), mouse_pos, Tower.TOWER_RADIUS, 3)
-                pygame.draw.circle(self.screen, (0, 255, 0, 30), mouse_pos, Tower.TOWER_RADIUS)
-                # Show cost
-                cost_font = pygame.font.SysFont(None, 24)
-                cost_text = cost_font.render(f"${TOWER_COST}", True, (255, 255, 255))
-                cost_rect = cost_text.get_rect(center=(mouse_pos[0], mouse_pos[1] - Tower.TOWER_RADIUS - 15))
-                pygame.draw.rect(self.screen, (0, 0, 0, 128), cost_rect.inflate(4, 2))
-                self.screen.blit(cost_text, cost_rect)
-            else:
-                # Red circle for invalid placement
-                pygame.draw.circle(self.screen, (255, 0, 0, 100), mouse_pos, Tower.TOWER_RADIUS, 3)
-                pygame.draw.circle(self.screen, (255, 0, 0, 30), mouse_pos, Tower.TOWER_RADIUS)
-                # Show "Can't place" message
-                invalid_font = pygame.font.SysFont(None, 20)
-                invalid_text = invalid_font.render("Can't place here", True, (255, 255, 255))
-                invalid_rect = invalid_text.get_rect(center=(mouse_pos[0], mouse_pos[1] - Tower.TOWER_RADIUS - 15))
-                pygame.draw.rect(self.screen, (0, 0, 0, 128), invalid_rect.inflate(4, 2))
-                self.screen.blit(invalid_text, invalid_rect)
+            # Draw drag line if in drag mode
+            if self.dragging_tower and self.drag_start_pos:
+                pygame.draw.line(self.screen, (255, 255, 0), self.drag_start_pos, mouse_pos, 3)
+                # Draw "DRAG TO PLACE" text
+                font = pygame.font.SysFont(None, 24)
+                drag_text = font.render("DRAG TO PLACE", True, (255, 255, 0))
+                text_pos = (mouse_pos[0] + 20, mouse_pos[1] - 30)
+                self.screen.blit(drag_text, text_pos)
         
         # Draw bloons
         for bloon in self.bloons:
@@ -288,6 +447,23 @@ class TowerDefenseGame:
         
         # Draw UI
         self.ui.draw(self.screen, self.money, self.lives, self.wave_number, self.paused)
+        
+        # Draw game mode indicator
+        if self.sandbox_mode:
+            mode_text = pygame.font.SysFont(None, 24).render(f"SANDBOX MODE - Click to spawn {self.sandbox_bloon_type.value.upper()} bloons (Press B to cycle)", True, WHITE)
+            mode_rect = mode_text.get_rect(topleft=(10, 10))
+            self.screen.blit(mode_text, mode_rect)
+        else:
+            mode_text = pygame.font.SysFont(None, 24).render("NORMAL MODE", True, WHITE)
+            mode_rect = mode_text.get_rect(topleft=(10, 10))
+            self.screen.blit(mode_text, mode_rect)
+        
+        # Draw tower selection panel
+        if not self.paused and not self.game_over:
+            self.tower_selection_panel.draw(self.screen, self.money)
+        
+        # Draw tower upgrade panel
+        self.upgrade_panel.draw(self.screen, self.money)
         
         # Draw settings icon (always visible, not when game over)
         if not self.game_over:
@@ -330,6 +506,8 @@ class TowerDefenseGame:
             self.pause_menu.draw(self.screen)
         elif self.current_menu == "settings":
             self.settings_menu.draw(self.screen)
+        elif self.current_menu == "mode_selection":
+            self.mode_selection.draw(self.screen)
         
         pygame.display.flip()
     

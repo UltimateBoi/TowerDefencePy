@@ -93,8 +93,10 @@ def main_menu():
                 mx, my = pygame.mouse.get_pos()
                 if start_button.is_clicked(mx, my):
                     print("Start button clicked!")
-                    # Start the tower defense game
+                    # Show mode selection screen instead of directly starting game
                     game = TowerDefenseGame()
+                    game.mode_selection.show()
+                    game.current_menu = "mode_selection"
                     game.run()
                     # Reinitialize display after game ends
                     screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))

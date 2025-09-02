@@ -18,6 +18,6 @@ BROWN = (139, 69, 19)
 GRAY = (128, 128, 128)
 
 # Game balance
-STARTING_MONEY = 50
+STARTING_MONEY = 650 # Enough for 3 dart monkeys or other combinations
 STARTING_LIVES = 20
 TOWER_COST = 10

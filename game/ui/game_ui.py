@@ -22,25 +22,21 @@ class GameUI:
         """
         # Draw money
         money_text = self.font.render(f"Money: ${money}", True, WHITE)
-        screen.blit(money_text, (10, 10))
+        screen.blit(money_text, (10, 40))
         
         # Draw lives
         lives_text = self.font.render(f"Lives: {lives}", True, WHITE)
-        screen.blit(lives_text, (10, 50))
+        screen.blit(lives_text, (10, 80))
         
         # Draw wave
         wave_text = self.font.render(f"Wave: {wave_number}", True, WHITE)
-        screen.blit(wave_text, (10, 90))
+        screen.blit(wave_text, (10, 120))
         
         # Draw pause indicator
         if paused:
             pause_text = self.font.render("PAUSED", True, (255, 255, 0))
-            screen.blit(pause_text, (10, 130))
+            screen.blit(pause_text, (10, 160))
         
-        # Draw controls hint
-        controls_text = self.small_font.render("ESC: Pause | Click gear icon: Settings", True, WHITE)
-        screen.blit(controls_text, (10, SCREEN_HEIGHT - 60))
-        
-        # Draw tower placement hint
-        hint_text = self.small_font.render("Click to place tower ($10)", True, WHITE)
-        screen.blit(hint_text, (10, SCREEN_HEIGHT - 30))
+        # Draw controls hint (moved down to replace tower placement hint)
+        controls_text = self.small_font.render("ESC: Pause | T: Toggle Towers | Right Click: Deselect | Click gear icon: Settings", True, WHITE)
+        screen.blit(controls_text, (10, SCREEN_HEIGHT - 30))
