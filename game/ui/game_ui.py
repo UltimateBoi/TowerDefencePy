@@ -7,9 +7,10 @@ from ..constants import WHITE, SCREEN_HEIGHT
 
 class GameUI:
     def __init__(self):
-        self.font = pygame.font.SysFont(None, 36)
-        self.small_font = pygame.font.SysFont(None, 24)
-        
+        # Larger fonts for better visibility
+        self.font = pygame.font.SysFont(None, 44)
+        self.small_font = pygame.font.SysFont(None, 28)
+
     def draw(self, screen, money: int, lives: int, wave_number: int, paused: bool = False):
         """Draw the game UI elements.
 
@@ -22,21 +23,21 @@ class GameUI:
         """
         # Draw money
         money_text = self.font.render(f"Money: ${money}", True, WHITE)
-        screen.blit(money_text, (10, 40))
-        
+        screen.blit(money_text, (10, 46))
+
         # Draw lives
         lives_text = self.font.render(f"Lives: {lives}", True, WHITE)
-        screen.blit(lives_text, (10, 80))
-        
+        screen.blit(lives_text, (10, 96))
+
         # Draw wave
         wave_text = self.font.render(f"Wave: {wave_number}", True, WHITE)
-        screen.blit(wave_text, (10, 120))
-        
+        screen.blit(wave_text, (10, 146))
+
         # Draw pause indicator
         if paused:
             pause_text = self.font.render("PAUSED", True, (255, 255, 0))
-            screen.blit(pause_text, (10, 160))
-        
+            screen.blit(pause_text, (10, 186))
+
         # Draw controls hint (moved down to replace tower placement hint)
         controls_text = self.small_font.render("ESC: Pause | T: Toggle Towers | Right Click: Deselect | Click gear icon: Settings", True, WHITE)
         screen.blit(controls_text, (10, SCREEN_HEIGHT - 30))

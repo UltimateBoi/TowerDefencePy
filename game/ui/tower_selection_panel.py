@@ -22,57 +22,57 @@ class TowerButton:
         """Draw the tower button"""
         # Check if player can afford this tower
         self.affordable = player_money >= self.tower_data.get('base_cost', 0)
-        
+
         # Button background
         if self.selected:
-            color = (100, 200, 100) # Green when selected
+            color = (100, 200, 100)  # Green when selected
         elif self.hover and self.affordable:
-            color = (80, 80, 120) # Light gray when hovering
+            color = (80, 80, 120)  # Light gray when hovering
         elif self.affordable:
-            color = (60, 60, 80) # Dark gray when affordable
+            color = (60, 60, 80)  # Dark gray when affordable
         else:
-            color = (40, 40, 40) # Very dark when unaffordable
-        
+            color = (40, 40, 40)  # Very dark when unaffordable
+
         pygame.draw.rect(screen, color, self.rect, border_radius=8)
-        
+
         # Border
         border_color = (255, 255, 255) if self.affordable else (100, 100, 100)
         border_width = 3 if self.selected else 1
         pygame.draw.rect(screen, border_color, self.rect, border_width, border_radius=8)
-        
+
         # Tower icon (colored circle based on tower type)
-        icon_radius = 18
-        icon_center = (self.rect.centerx, self.rect.y + 25)
+        icon_radius = min(28, max(12, self.rect.width // 8))
+        icon_center = (self.rect.centerx, self.rect.y + 30)
         icon_color = tuple(self.tower_data.get('icon_color', [139, 69, 19]))
-        
+
         # Dim the icon if unaffordable
         if not self.affordable:
             icon_color = tuple(c // 3 for c in icon_color)
-        
+
         pygame.draw.circle(screen, icon_color, icon_center, icon_radius)
         pygame.draw.circle(screen, border_color, icon_center, icon_radius, 2)
-        
+
         # Tower name (shortened)
-        font = pygame.font.SysFont(None, 14)
+        font = pygame.font.SysFont(None, 18)
         name = self.tower_data.get('name', 'Tower')
         # Shorten long names
-        if len(name) > 8:
+        if len(name) > 10:
             if 'Monkey' in name:
                 name = name.replace(' Monkey', '')
             elif 'Shooter' in name:
                 name = name.replace(' Shooter', '')
-        
+
         name_color = (255, 255, 255) if self.affordable else (100, 100, 100)
         name_text = font.render(name, True, name_color)
-        name_rect = name_text.get_rect(centerx=self.rect.centerx, y=self.rect.y + 48)
+        name_rect = name_text.get_rect(centerx=self.rect.centerx, y=self.rect.y + 56)
         screen.blit(name_text, name_rect)
-        
+
         # Cost
-        cost_font = pygame.font.SysFont(None, 12)
+        cost_font = pygame.font.SysFont(None, 16)
         cost = self.tower_data.get('base_cost', 0)
         cost_color = (255, 255, 0) if self.affordable else (100, 100, 50)
         cost_text = cost_font.render(f"${cost}", True, cost_color)
-        cost_rect = cost_text.get_rect(centerx=self.rect.centerx, y=self.rect.y + 62)
+        cost_rect = cost_text.get_rect(centerx=self.rect.centerx, y=self.rect.y + 76)
         screen.blit(cost_text, cost_rect)
     
     def handle_click(self, pos: Tuple[int, int]) -> bool:
@@ -90,33 +90,46 @@ class TowerSelectionPanel:
     def __init__(self):
         # Horizontal layout at the top center of the screen
         from ..constants import SCREEN_WIDTH
-        
-        self.button_width = 80
-        self.button_height = 100
+
         self.button_spacing = 10
-        self.visible = True # Toggleable visibility
-        
-        # Calculate panel dimensions and position
-        self.num_towers = 4 # We'll have 4 tower types
-        panel_width = (self.button_width + self.button_spacing) * self.num_towers - self.button_spacing + 20 # 20 for padding
-        self.x = (SCREEN_WIDTH - panel_width) // 2 # Center horizontally
-        self.y = 10 # Top of screen with small margin
-        self.width = panel_width
-        self.height = self.button_height + 40 # Extra space for toggle button
-        
-        self.rect = pygame.Rect(self.x, self.y, self.width, self.height)
-        
-        # Toggle button for showing/hiding panel
-        self.toggle_button_rect = pygame.Rect(self.x + self.width - 25, self.y + 5, 20, 20)
-        
-        # Tower data
+        self.visible = True  # Toggleable visibility
+
+        # Load tower data
         self.towers_data: Dict = {}
+        self.load_tower_data()
+
+        # Keep a compact, centered panel width (previous behavior)
+        # Default per-button width (original style) and taller buttons vertically
+        self.button_width = 80
+        self.button_height = 110
+        self.num_towers = max(1, len(self.towers_data))
+
+        # Calculate panel width to tightly fit buttons with small internal padding
+        panel_width = (self.button_width + self.button_spacing) * self.num_towers - self.button_spacing + 20
+        self.x = (SCREEN_WIDTH - panel_width) // 2
+        self.y = 10
+        self.width = panel_width
+        self.height = self.button_height + 20  # Consistent 10px padding top and bottom
+
+        # Header height (space reserved at top for toggle button)
+        self.header_height = 30
+        # Panel rectangle positioned below header so header contents remain visible
+        self.rect = pygame.Rect(self.x, self.y + self.header_height, self.width, self.height)
+
+        # Toggle button for showing/hiding panel (centered in header)
+        button_size = 26
+        self.toggle_button_rect = pygame.Rect(
+            self.x + (self.width - button_size) // 2,  # Center horizontally
+            self.y + (self.header_height - button_size) // 2,  # Center vertically in header
+            button_size,
+            button_size,
+        )
+
         self.tower_buttons: List[TowerButton] = []
         self.selected_tower_id: Optional[str] = None
         self.placement_mode = False
-        
-        # Load tower data
-        self.load_tower_data()
+
+        # Create buttons now that sizes are known
         self.create_tower_buttons()
     
     def load_tower_data(self):
@@ -136,7 +149,8 @@ class TowerSelectionPanel:
         # Create buttons for each tower type, arranged horizontally
         for i, (tower_id, tower_data) in enumerate(self.towers_data.items()):
             button_x = self.x + 10 + i * (self.button_width + self.button_spacing)
-            button_y = self.y + 30 # Fixed Y position in horizontal layout
+            # Place buttons within the panel area (below header)
+            button_y = self.rect.y + 10
             button = TowerButton(tower_id, tower_data, button_x, button_y, self.button_width, self.button_height)
             self.tower_buttons.append(button)
     
@@ -173,7 +187,21 @@ class TowerSelectionPanel:
     
     def draw(self, screen: pygame.Surface, player_money: int):
         """Draw the tower selection panel"""
-        # Draw toggle button (always visible)
+    # Header reserved for toggle; no title text so only towers show
+
+        # Only draw the panel body if it's visible
+        if self.visible:
+            # Panel background (starts below header)
+            pygame.draw.rect(screen, (40, 40, 50), self.rect, border_radius=10)
+            pygame.draw.rect(screen, (150, 150, 150), self.rect, 2, border_radius=10)
+            
+            # Draw tower buttons
+            for button in self.tower_buttons:
+                button.draw(screen, player_money)
+            
+            # No instruction text — keep panel minimal with just tower buttons
+        
+        # Draw toggle button (always visible, drawn last to appear on top)
         toggle_color = (100, 200, 100) if self.visible else (200, 100, 100)
         pygame.draw.rect(screen, toggle_color, self.toggle_button_rect, border_radius=3)
         pygame.draw.rect(screen, (255, 255, 255), self.toggle_button_rect, 2, border_radius=3)
@@ -184,44 +212,6 @@ class TowerSelectionPanel:
         icon_text = font.render(icon, True, (255, 255, 255))
         icon_rect = icon_text.get_rect(center=self.toggle_button_rect.center)
         screen.blit(icon_text, icon_rect)
-        
-        # Only draw the panel if it's visible
-        if not self.visible:
-            return
-            
-        # Panel background
-        pygame.draw.rect(screen, (40, 40, 50), self.rect, border_radius=10)
-        pygame.draw.rect(screen, (150, 150, 150), self.rect, 2, border_radius=10)
-        
-        # Title
-        font = pygame.font.SysFont(None, 20)
-        title_text = font.render("Select Tower", True, (255, 255, 255))
-        title_rect = title_text.get_rect(centerx=self.rect.centerx, y=self.y + 8)
-        screen.blit(title_text, title_rect)
-        
-        # Draw tower buttons
-        for button in self.tower_buttons:
-            button.draw(screen, player_money)
-        
-        # Instructions at bottom
-        if self.selected_tower_id:
-            instr_font = pygame.font.SysFont(None, 12)
-            instr_text = "Click map\nto place"
-            lines = instr_text.split('\n')
-            for i, line in enumerate(lines):
-                line_surface = instr_font.render(line, True, (200, 200, 200))
-                line_rect = line_surface.get_rect(centerx=self.rect.centerx, 
-                                                y=self.rect.bottom - 30 + i * 12)
-                screen.blit(line_surface, line_rect)
-        else:
-            instr_font = pygame.font.SysFont(None, 12)
-            instr_text = "Select\na tower"
-            lines = instr_text.split('\n')
-            for i, line in enumerate(lines):
-                line_surface = instr_font.render(line, True, (150, 150, 150))
-                line_rect = line_surface.get_rect(centerx=self.rect.centerx, 
-                                                y=self.rect.bottom - 30 + i * 12)
-                screen.blit(line_surface, line_rect)
     
     def draw_placement_preview(self, screen: pygame.Surface, mouse_pos: Tuple[int, int], 
                              game_map, towers, player_money: int = 1000):
