@@ -167,6 +167,20 @@ class TowerDefenseGame:
                     bloon_types = [BloonType.RED, BloonType.BLUE, BloonType.GREEN, BloonType.YELLOW]
                     current_index = bloon_types.index(self.sandbox_bloon_type)
                     self.sandbox_bloon_type = bloon_types[(current_index + 1) % len(bloon_types)]
+                elif event.key == pygame.K_TAB and not self.paused:
+                    # Cycle targeting mode for selected tower
+                    if self.selected_tower:
+                        self.selected_tower.cycle_targeting_mode()
+                elif event.key == pygame.K_DELETE and not self.paused:
+                    # Sell selected tower (DELETE key)
+                    if self.selected_tower:
+                        self.sell_tower(self.selected_tower)
+                        self.selected_tower = None
+                elif event.key == pygame.K_x and not self.paused:
+                    # Sell selected tower (X key, like BTD6)
+                    if self.selected_tower:
+                        self.sell_tower(self.selected_tower)
+                        self.selected_tower = None
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 mouse_pos = pygame.mouse.get_pos()
                 
@@ -319,16 +333,37 @@ class TowerDefenseGame:
                 range_val = base_stats.get('range', 32) * 3 # Scale up range for gameplay
                 damage = base_stats.get('damage', 1)
                 fire_rate = base_stats.get('fire_rate', 0.95)
+                pierce = base_stats.get('pierce', 1)
+                projectiles = base_stats.get('projectiles', 1)
                 
                 # Create tower with proper stats
-                self.towers.append(Tower(
+                new_tower = Tower(
                     position, 
                     range_val=range_val, 
                     damage=damage, 
                     fire_rate=fire_rate,
+                    pierce=pierce,
+                    projectiles=projectiles,
                     tower_type=selected_tower_id
-                ))
+                )
+                new_tower.set_base_cost(tower_cost)
+                self.towers.append(new_tower)
                 self.money -= tower_cost
+    
+    def sell_tower(self, tower: 'Tower'):
+        """Sell a tower and get money back"""
+        if tower in self.towers:
+            sell_price = tower.get_sell_price()
+            self.money += sell_price
+            self.towers.remove(tower)
+            
+            # Clear selection if this tower was selected
+            if hasattr(self, 'upgrade_panel') and self.upgrade_panel.selected_tower == tower:
+                self.upgrade_panel.set_selected_tower(None)
+            
+            print(f"Tower sold for ${sell_price}")
+            return sell_price
+        return 0
     
     def spawn_bloon(self, position: Tuple[int, int], bloon_type: BloonType = None):
         """Spawn a bloon at the given position in sandbox mode"""
@@ -394,13 +429,13 @@ class TowerDefenseGame:
         
         # Update towers and create projectiles
         for tower in self.towers:
-            projectile = tower.update(self.bloons, current_time)
-            if projectile:
-                self.projectiles.append(projectile)
+            new_projectiles = tower.update(self.bloons, current_time)
+            if new_projectiles:
+                self.projectiles.extend(new_projectiles)
         
         # Update projectiles
         for projectile in self.projectiles[:]:
-            projectile.update()
+            projectile.update(self.bloons)
             if not projectile.alive:
                 self.projectiles.remove(projectile)
         

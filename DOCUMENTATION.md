@@ -46,6 +46,59 @@ A fully functional tower defense game inspired by Bloons TD6, implemented using 
 
 ## Technical Implementation Details
 
+### BTD6-Style Mechanics (Version 2.2.0)
+
+#### Enhanced Tower System
+
+- **Pierce Mechanics**: Projectiles track hit bloons and remaining pierce count
+- **Multi-Projectile Support**: Towers can fire multiple projectiles per shot (Tack Shooter: 8 tacks)
+- **Targeting Modes**: Four authentic BTD6 targeting options:
+  - `first`: Targets bloon furthest along path
+  - `last`: Targets bloon closest to start
+  - `close`: Targets closest bloon to tower
+  - `strong`: Targets bloon with highest health
+- **Special Abilities**: Framework for camo detection, lead popping, seeking projectiles
+
+#### Advanced Projectile System
+
+- **Pierce Tracking**: Each projectile maintains `hit_bloons` set and `pierce_remaining` counter
+- **Seeking Mechanics**: Projectiles can automatically track and seek targets
+- **Realistic Collision**: Uses `bloon.size + 3` pixel radius instead of fixed 8-pixel hitbox
+- **Directional Firing**: Support for specific patterns (e.g., Tack Shooter 360° spread)
+
+#### Tower Selling Economics
+
+- **BTD6 Formula**: Sell price = 70% of total money spent (rounded down)
+- **Cost Tracking**: Tracks base cost + all upgrade costs through `total_spent` property
+- **Real-time UI**: Sell price displayed and updated in upgrade panel
+- **Controls**: X key or DELETE key to sell selected tower
+
+#### Technical Implementation Examples
+
+```python
+# Enhanced Collision Detection
+collision_radius = bloon.size + 3  # Realistic hit detection
+if distance <= collision_radius:
+    if bloon not in self.hit_bloons:
+        bloon.take_damage(self.damage)
+        self.hit_bloons.add(bloon)
+        self.pierce_remaining -= 1
+
+# Tower Targeting System  
+def find_target(self, bloons):
+    targets_in_range = [(b, self.distance_to(b)) for b in bloons if self.distance_to(b) <= self.range]
+    if self.targeting_mode == "first":
+        return max(targets_in_range, key=lambda x: x[0].path_position)[0]
+    elif self.targeting_mode == "strong":
+        return max(targets_in_range, key=lambda x: x[0].health)[0]
+
+# Multi-Projectile Firing (Tack Shooter)
+if self.tower_type == "tack_shooter":
+    for i in range(8):  # 8 projectiles in circle
+        angle = (2 * math.pi * i) / 8
+        projectile = Projectile(x, y, angle, self.projectile_damage, self.pierce)
+```
+
 ### Classes Implemented
 
 1. **BloonType (Enum)**: Defines bloon varieties
@@ -61,8 +114,9 @@ A fully functional tower defense game inspired by Bloons TD6, implemented using 
 ### Game Balance
 
 - **Starting Resources**: $50 money, 20 lives
-- **Tower Cost**: $10 per tower
-- **Tower Stats**: 100 range, 1 damage, 1 shot/second
+- **Tower Costs**: Dart Monkey $200, Tack Shooter $280, Boomerang Monkey $325, Bomb Shooter $525
+- **Tower Selling**: 70% of total money spent (BTD6 formula)
+- **Tower Stats**: Authentic BTD6 pierce, projectiles, and targeting capabilities
 - **Bloon Types**: 4 varieties with scaling difficulty
 - **Wave Progression**: 4 waves with increasing challenge
 
@@ -70,13 +124,15 @@ A fully functional tower defense game inspired by Bloons TD6, implemented using 
 
 - 60 FPS target with pygame.Clock
 - Efficient object management and cleanup
-- Optimized collision detection
-- Memory-conscious projectile handling
+- Optimized collision detection using bloon visual size
+- Memory-conscious projectile handling with pierce tracking
 
 ### Controls
 
-- **Left Click**: Place tower
+- **Left Click**: Place tower / Select placed tower
 - **SPACE**: Start next wave
+- **TAB**: Cycle targeting modes (selected tower)
+- **X / DELETE**: Sell selected tower
 - **ESC**: Quit game
 
 ## File Structure

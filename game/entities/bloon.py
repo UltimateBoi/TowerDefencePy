@@ -31,12 +31,18 @@ class Bloon:
         self.alive = True
         self.reached_end = False
         
+        # BTD6-style properties for targeting
+        self.is_camo = False  # Can be detected by camo-detection towers only
+        self.is_lead = False  # Requires lead-popping power
+        self.path_position = 0.0  # Progress along path (0.0 to 1.0)
+        
     def update(self):
         if not self.alive or self.reached_end:
             return
             
         if self.path_index >= len(self.path) - 1:
             self.reached_end = True
+            self.path_position = 1.0  # Reached end of path
             return
             
         # Move towards next waypoint
@@ -51,6 +57,9 @@ class Bloon:
             # Move towards target
             self.position[0] += (dx / distance) * self.speed
             self.position[1] += (dy / distance) * self.speed
+        
+        # Update path position for targeting priority
+        self.path_position = self.path_index / max(1, len(self.path) - 1)
     
     def take_damage(self, damage: int):
         self.health -= damage

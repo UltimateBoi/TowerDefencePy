@@ -1,8 +1,129 @@
 # Tower Defense Game - Changelog
 
-## Version 2.1.0 - August 23, 2025
+## Version 2.2.0 - September 7, 2025
 
 ### Major Features
+
+#### BTD6-Style Tower Mechanics Implementation
+
+**Date**: September 7, 2025  
+**Files**: `game/entities/tower.py`, `game/entities/projectile.py`, `game/entities/bloon.py`, `game/tower_defense_game.py`, `game/ui/ingame_upgrade_panel.py`
+
+Successfully implemented authentic BTD6/BTDB tower mechanics, bringing the gameplay to professional standards:
+
+**Enhanced Tower System**:
+
+- **Pierce Mechanics**: Projectiles can hit multiple bloons before expiring
+- **Multi-Projectile Support**: Towers fire multiple projectiles per shot (Tack Shooter fires 8 tacks)
+- **Targeting Modes**: Four BTD6-style targeting modes:
+  - First: Target bloon furthest along the path
+  - Last: Target bloon closest to the start  
+  - Close: Target closest bloon to tower
+  - Strong: Target bloon with highest health
+- **Special Abilities**: Framework for camo detection, lead popping, seeking projectiles
+- **Authentic Stats**: Pierce, projectile count, projectile speed from BTD6 data
+
+**Advanced Projectile System**:
+
+- **Pierce Tracking**: Projectiles track hit bloons and remaining pierce
+- **Seeking Mechanics**: Projectiles automatically seek nearby targets
+- **Multi-Hit Prevention**: Prevents hitting same bloon multiple times
+- **Directional Firing**: Support for specific firing patterns (Tack Shooter)
+- **Lifespan Management**: Projectiles expire to prevent memory leaks
+
+**Controls**:
+
+- **Tab Key**: Cycle targeting modes for selected tower
+- **Visual Feedback**: Shows current targeting mode when tower selected
+
+#### Enhanced Collision Detection System
+
+**Date**: September 7, 2025  
+**Files**: `game/entities/projectile.py`
+
+Replaced tiny 8-pixel hit radius with realistic bloon-size based collision:
+
+**Problem Solved**:
+
+- **Before**: Fixed 8-pixel collision radius regardless of bloon size
+- **After**: Uses each bloon's actual visual size plus 3-pixel buffer
+
+**Implementation**:
+
+```python
+collision_radius = bloon.size + 3  # Bloon radius + projectile radius
+if distance <= collision_radius:
+    # Hit detected when projectile visually touches bloon
+```
+
+**Benefits**:
+
+- **Realistic Hitting**: Projectiles hit when they visually touch bloons
+- **Size-Based Detection**: Larger bloons easier to hit (authentic behavior)
+- **BTD6 Consistency**: Matches professional game feel
+- **Better Experience**: No more "near misses" that look like hits
+
+#### Tower Selling System
+
+**Date**: September 7, 2025  
+**Files**: `game/entities/tower.py`, `game/tower_defense_game.py`, `game/ui/ingame_upgrade_panel.py`
+
+Added complete tower selling functionality with BTD6-authentic pricing:
+
+**BTD6-Authentic Selling**:
+
+- **Sell Price Formula**: 70% of total money spent (rounded down)
+- **Spending Tracking**: Tracks base cost + all upgrade costs
+- **Real-time Updates**: Sell price updates as tower is upgraded
+
+**Features**:
+
+- **Cost Tracking**: Tracks all money spent on each tower through upgrades
+- **UI Integration**: Sell price displayed in upgrade panel with instructions
+- **User Controls**: X key or DELETE key to sell selected tower
+- **Economic Balance**: Prevents economic exploits through proper tracking
+
+**Example Pricing**:
+
+- Base Dart Monkey ($200) sells for $140 (70%)
+- Fully upgraded tower ($680 total) sells for $475 (70%)
+
+### Technical Implementation
+
+**Verified Functionality**:
+
+- **Tower Creation**: Proper BTD6 properties (pierce, projectiles, targeting)
+- **Targeting Modes**: All four modes cycle correctly
+- **Projectile System**: Pierce mechanics and seeking behavior work
+- **Multi-Projectiles**: Tack Shooter fires 8 projectiles, Dart Monkey fires 1
+- **Collision Detection**: Realistic hit detection using bloon visual size
+- **Tower Selling**: Accurate cost tracking and BTD6 pricing formula
+- **Game Integration**: No conflicts with existing systems
+
+**Authentic BTD6 Behavior**:
+
+- **Dart Monkey**: Single dart with 1 pierce, accurate range and damage
+- **Tack Shooter**: 8 tacks in all directions, authentic fire rate and range
+- **Upgrade Paths**: All three paths per tower with proper stat modifications
+- **Economic System**: BTD6-style selling encourages strategic spending
+
+**Performance Impact**:
+
+- **Collision**: Identical performance with better accuracy
+- **Selling**: Minimal impact with major functionality gain
+- **Memory**: Negligible increase for significantly improved gameplay
+
+**Benefits for Players**:
+
+1. **Authentic Gameplay**: Feels like real BTD6/BTDB with proper mechanics
+2. **Strategic Depth**: Targeting modes add tactical decision-making
+3. **Tower Variety**: Different towers have unique firing patterns
+4. **Economic Strategy**: Can sell towers to reposition or upgrade elsewhere
+5. **Professional Polish**: Features match commercial tower defense games
+
+## Version 2.1.0 - August 23, 2025
+
+### New Features
 
 #### Tower Placement Collision Detection System
 
@@ -41,7 +162,7 @@ Enhanced tower placement with comprehensive collision detection and visual feedb
 
 ## Version 2.0.0 - August 21, 2025
 
-### New Features
+### Major Features
 
 #### BTD6 Tower System Implementation
 

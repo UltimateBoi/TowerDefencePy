@@ -190,6 +190,14 @@ class InGameUpgradePanel:
         money_surface = stats_font.render(money_text, True, (255, 255, 0))
         money_rect = money_surface.get_rect(centerx=self.rect.centerx, y=self.rect.y + 155)
         screen.blit(money_surface, money_rect)
+        
+        # Sell price display
+        if self.selected_tower:
+            sell_price = self.selected_tower.get_sell_price()
+            sell_text = f"Sell value: ${sell_price} (X key)"
+            sell_surface = stats_font.render(sell_text, True, (255, 100, 100))
+            sell_rect = sell_surface.get_rect(centerx=self.rect.centerx, y=self.rect.y + 175)
+            screen.blit(sell_surface, sell_rect)
     
     def handle_click(self, pos: Tuple[int, int], player_money: int) -> int:
         """Handle clicks on upgrade buttons. Returns money spent."""
