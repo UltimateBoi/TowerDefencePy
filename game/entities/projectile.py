@@ -81,14 +81,16 @@ class Projectile:
             self.alive = False
             return
         
-        # Seeking behavior
+        # Seeking behavior - optimized distance calculation
         if self.has_seeking and bloons:
             target = self.find_nearest_target(bloons)
             if target:
                 dx = target.position[0] - self.position[0]
                 dy = target.position[1] - self.position[1]
-                distance = math.sqrt(dx * dx + dy * dy)
-                if distance > 0:
+                distance_squared = dx * dx + dy * dy
+                if distance_squared > 0:
+                    # Only calculate sqrt when we need the actual distance
+                    distance = math.sqrt(distance_squared)
                     self.velocity[0] = (dx / distance) * self.speed
                     self.velocity[1] = (dy / distance) * self.speed
         
@@ -96,20 +98,22 @@ class Projectile:
         self.position[0] += self.velocity[0]
         self.position[1] += self.velocity[1]
         
-        # Check for collisions with bloons
+        # Check for collisions with bloons - optimized
         if bloons:
             for bloon in bloons:
                 if not bloon.alive or bloon in self.hit_bloons:
                     continue
-                    
-                distance = math.sqrt(
-                    (bloon.position[0] - self.position[0]) ** 2 + 
-                    (bloon.position[1] - self.position[1]) ** 2
-                )
+                
+                # Use squared distance to avoid sqrt calculation
+                dx = bloon.position[0] - self.position[0]
+                dy = bloon.position[1] - self.position[1]
+                distance_squared = dx * dx + dy * dy
                 
                 # Enhanced collision detection - use bloon's actual size plus small projectile buffer
                 collision_radius = bloon.size + 3  # Bloon radius + small projectile radius
-                if distance <= collision_radius:
+                collision_radius_squared = collision_radius * collision_radius
+                
+                if distance_squared <= collision_radius_squared:
                     bloon.take_damage(self.damage)
                     self.hit_bloons.add(bloon)
                     self.pierce_remaining -= 1

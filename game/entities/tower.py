@@ -132,15 +132,22 @@ class Tower:
         return current_time - self.last_shot_time >= (1000 / self.fire_rate) # Convert to milliseconds
     
     def find_target(self, bloons: List['Bloon']) -> Optional['Bloon']:
-        """Find a target bloon based on targeting mode"""
+        """Find a target bloon based on targeting mode - optimized"""
         targets_in_range = []
+        range_squared = self.range * self.range  # Cache squared range
         
         for bloon in bloons:
             if not bloon.alive:
                 continue
-                
-            distance = ((self.position[0] - bloon.position[0]) ** 2 + (self.position[1] - bloon.position[1]) ** 2) ** 0.5
-            if distance <= self.range and self.can_target_bloon(bloon):
+            
+            # Use squared distance to avoid sqrt calculation    
+            dx = self.position[0] - bloon.position[0]
+            dy = self.position[1] - bloon.position[1]
+            distance_squared = dx * dx + dy * dy
+            
+            if distance_squared <= range_squared and self.can_target_bloon(bloon):
+                # Only calculate actual distance when needed for sorting
+                distance = math.sqrt(distance_squared) if self.targeting_mode == "close" else 0
                 targets_in_range.append((bloon, distance))
         
         if not targets_in_range:

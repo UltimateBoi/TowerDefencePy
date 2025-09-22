@@ -45,18 +45,20 @@ class Bloon:
             self.path_position = 1.0  # Reached end of path
             return
             
-        # Move towards next waypoint
+        # Move towards next waypoint - optimized
         target = self.path[self.path_index + 1]
         dx = target[0] - self.position[0]
         dy = target[1] - self.position[1]
-        distance = math.sqrt(dx * dx + dy * dy)
+        distance_squared = dx * dx + dy * dy
         
-        if distance < 5: # Close enough to waypoint
+        if distance_squared < 25: # Close enough to waypoint (5^2 = 25)
             self.path_index += 1
         else:
-            # Move towards target
-            self.position[0] += (dx / distance) * self.speed
-            self.position[1] += (dy / distance) * self.speed
+            # Move towards target - avoid sqrt when possible
+            if distance_squared > 0:
+                distance = math.sqrt(distance_squared)
+                self.position[0] += (dx / distance) * self.speed
+                self.position[1] += (dy / distance) * self.speed
         
         # Update path position for targeting priority
         self.path_position = self.path_index / max(1, len(self.path) - 1)
