@@ -129,7 +129,7 @@ class TowerDefenseGame:
             
         self.game_map = GameMap(map_data)
     
-    def create_waves(self) -> List[Wave]:
+    def create_waves(self) -> List[Wave]: # TODO: create a system to load levels and their bloons from corresponding maps (including E/M/H Easy Medium Hard logic (/impossible))
         waves = []
         # Wave 1: 10 red bloons
         waves.append(Wave([BloonType.RED], [10], 800))
