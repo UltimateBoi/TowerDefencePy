@@ -6,6 +6,17 @@ __pycache__/
 # C extensions
 *.so
 
+# Firebase credentials (DO NOT COMMIT!)
+firebase-credentials.json
+*service-account*.json
+google-oauth-credentials.json
+.env
+.env.local
+*.env
+
+# Session data
+.towerdefense/
+
 # Distribution / packaging
 .Python
 build/

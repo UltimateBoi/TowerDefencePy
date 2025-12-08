@@ -379,6 +379,7 @@ class TowerUpgradesScreen:
             if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                 # Check back button
                 if self.back_button.is_clicked(*mouse_pos):
+                    self.back_button.reset_cursor_on_click()
                     return "back"
                 
                 # Check tower cards

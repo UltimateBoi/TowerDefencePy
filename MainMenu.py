@@ -5,6 +5,9 @@ from utils.ButtonUtil import TextButton
 import getpass
 from game import TowerDefenseGame
 from game.ui.tower_upgrades_screen import TowerUpgradesScreen
+from game.ui.login_screen import LoginScreen
+from game.services.firebase_service import firebase_service
+from game.ui.profile_dropdown import ProfileDropdownPanel
 
 pygame.init()
 
@@ -51,6 +54,17 @@ def main_menu():
     screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
     pygame.display.set_caption(get_window_title())
     
+    # Show login screen first
+    login_screen = LoginScreen(screen)
+    login_screen.run()
+    
+    # Get current user info for display
+    current_user = firebase_service.get_current_user()
+    if current_user:
+        username = current_user.get('displayName', 'Player')
+    else:
+        username = getpass.getuser()
+    
     running = True
     font = pygame.font.SysFont(None, 72)
     small_font = pygame.font.SysFont(None, 36)
@@ -72,11 +86,21 @@ def main_menu():
     money_width = 120
     money_height = 48
     money_amount = 999
-    username = getpass.getuser()
     profile_x = 20 # Adjusted for text
     profile_y = 20
     money_x = SCREEN_WIDTH - money_width - 20
     money_y = 20
+    
+    # Profile dropdown panel
+    profile_dropdown = ProfileDropdownPanel()
+    
+    # Profile widget clickable area (for opening dropdown)
+    profile_widget_width = 200
+    profile_widget_height = 50
+    profile_widget_rect = pygame.Rect(profile_x, profile_y, profile_widget_width, profile_widget_height)
+    
+    # Track hover state for cursor management
+    last_menu_hover_state = False
 
     # Placeholder for background image
     try:
@@ -86,13 +110,55 @@ def main_menu():
         bg_image = None
 
     while running:
+        mx, my = pygame.mouse.get_pos()
+        
+        # Update button hover states
+        start_button.update_hover(mx, my)
+        towers_button.update_hover(mx, my)
+        
+        # Check if hovering over profile widget (but not handled by buttons)
+        hovering_profile = profile_widget_rect.collidepoint(mx, my)
+        
+        # Update cursor only if hover state changed
+        if hovering_profile != last_menu_hover_state:
+            if hovering_profile:
+                pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_HAND)
+            else:
+                pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_ARROW)
+            last_menu_hover_state = hovering_profile
+        
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
             elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-                mx, my = pygame.mouse.get_pos()
+                
+                # Check profile dropdown actions first
+                dropdown_action = profile_dropdown.handle_event(event, (mx, my))
+                if dropdown_action == 'logout':
+                    # Clear session first
+                    firebase_service.logout()
+                    profile_dropdown.hide()
+                    
+                    # Show login screen with auto-login disabled
+                    login_screen = LoginScreen(screen, skip_auto_login=True)
+                    login_screen.run()
+                    
+                    # Update username after re-login
+                    current_user = firebase_service.get_current_user()
+                    if current_user:
+                        username = current_user.get('displayName', 'Player')
+                    else:
+                        username = getpass.getuser()
+                    continue
+                
+                # Check if profile widget clicked
+                if profile_widget_rect.collidepoint(mx, my):
+                    profile_dropdown.toggle()
+                    continue
+                
                 if start_button.is_clicked(mx, my):
                     print("Start button clicked!")
+                    start_button.reset_cursor_on_click()
                     # Show mode selection screen instead of directly starting game
                     game = TowerDefenseGame()
                     game.mode_selection.show()
@@ -103,6 +169,7 @@ def main_menu():
                     pygame.display.set_caption(get_window_title())
                 elif towers_button.is_clicked(mx, my):
                     print("Towers button clicked!")
+                    towers_button.reset_cursor_on_click()
                     # Show tower upgrades screen
                     tower_upgrades_screen = TowerUpgradesScreen(SCREEN_WIDTH, SCREEN_HEIGHT)
                     upgrades_running = True
@@ -138,15 +205,19 @@ def main_menu():
         # Draw title
         TextUtil.draw_string(screen, font, "Tower Defense Game", (255, 255, 255), SCREEN_WIDTH//2, SCREEN_HEIGHT//2)
 
-        # Draw buttons
-        start_button.draw(screen)
-        towers_button.draw(screen)
+        # Draw buttons with hover effects
+        start_button.draw(screen, (mx, my))
+        towers_button.draw(screen, (mx, my))
 
         # Draw profile icon and money display
         # Draw username with blurred rounded rectangle background
         font = pygame.font.SysFont(None, 36)
         TextUtil.draw_text_with_blur_rect(screen, username, font, profile_x, profile_y, padding=16, border_radius=20, blur_radius=8)
         draw_money_display(screen, money_x, money_y, money_width, money_height, money_amount)
+        
+        # Draw profile dropdown panel (on top of everything)
+        mx, my = pygame.mouse.get_pos()
+        profile_dropdown.draw(screen, (mx, my))
 
         pygame.display.flip()
 

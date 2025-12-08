@@ -128,6 +128,7 @@ class TowerSelectionPanel:
         self.tower_buttons: List[TowerButton] = []
         self.selected_tower_id: Optional[str] = None
         self.placement_mode = False
+        self._last_hover_state = False
 
         # Create buttons now that sizes are known
         self.create_tower_buttons()
@@ -188,6 +189,27 @@ class TowerSelectionPanel:
     def draw(self, screen: pygame.Surface, player_money: int):
         """Draw the tower selection panel"""
     # Header reserved for toggle; no title text so only towers show
+        
+        # Check if hovering over any interactive elements
+        mouse_pos = pygame.mouse.get_pos()
+        hovering = self.toggle_button_rect.collidepoint(mouse_pos)
+        
+        if self.visible:
+            # Check if hovering over panel or any tower buttons
+            if self.rect.collidepoint(mouse_pos):
+                hovering = True
+                for button in self.tower_buttons:
+                    if button.rect.collidepoint(mouse_pos) and button.affordable:
+                        hovering = True
+                        break
+        
+        # Update cursor only when hover state changes
+        if hovering != self._last_hover_state:
+            if hovering:
+                pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_HAND)
+            else:
+                pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_ARROW)
+            self._last_hover_state = hovering
 
         # Only draw the panel body if it's visible
         if self.visible:
@@ -278,6 +300,8 @@ class TowerSelectionPanel:
         # Check toggle button first (always available)
         if self.toggle_button_rect.collidepoint(pos):
             self.visible = not self.visible
+            pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_ARROW)
+            self._last_hover_state = False
             return None
         
         # Only handle tower button clicks if panel is visible
@@ -295,6 +319,8 @@ class TowerSelectionPanel:
                 if button.tower_id == self.selected_tower_id:
                     # Deselect the tower type
                     self.deselect_tower()
+                    pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_ARROW)
+                    self._last_hover_state = False
                     return None
                 else:
                     # Select a different tower type - deselect all first
@@ -305,6 +331,7 @@ class TowerSelectionPanel:
                     button.selected = True
                     self.selected_tower_id = button.tower_id
                     self.placement_mode = True
+                    # Don't reset cursor here - user is now in placement mode
                     return button.tower_id
         
         return None

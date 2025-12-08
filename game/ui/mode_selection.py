@@ -14,6 +14,7 @@ class GameModeSelection:
         self.button_font = pygame.font.SysFont(None, 36)
         self.small_font = pygame.font.SysFont(None, 24)
         self.visible = False
+        self._last_hover_state = False
 
         # Menu dimensions
         self.menu_width = 600
@@ -64,10 +65,13 @@ class GameModeSelection:
             return "none"
 
         if self.normal_button.collidepoint(mouse_pos):
+            pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_ARROW)
             return "normal_mode"
         elif self.sandbox_button.collidepoint(mouse_pos):
+            pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_ARROW)
             return "sandbox_mode"
         elif self.back_button.collidepoint(mouse_pos):
+            pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_ARROW)
             return "back"
 
         return "none"
@@ -92,9 +96,23 @@ class GameModeSelection:
         title_text = self.font.render("SELECT GAME MODE", True, BLACK)
         title_rect = title_text.get_rect(center=(self.menu_x + self.menu_width // 2, self.menu_y + 50))
         screen.blit(title_text, title_rect)
+        
+        # Check for hover and update cursor only when state changes
+        mouse_pos = pygame.mouse.get_pos()
+        hovering = (self.normal_button.collidepoint(mouse_pos) or 
+                   self.sandbox_button.collidepoint(mouse_pos) or 
+                   self.back_button.collidepoint(mouse_pos))
+        
+        if hovering != self._last_hover_state:
+            if hovering:
+                pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_HAND)
+            else:
+                pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_ARROW)
+            self._last_hover_state = hovering
 
-        # Draw normal mode button and description
-        pygame.draw.rect(screen, GREEN, self.normal_button)
+        # Draw normal mode button with hover effect
+        normal_color = (0, 200, 70) if self.normal_button.collidepoint(mouse_pos) else GREEN
+        pygame.draw.rect(screen, normal_color, self.normal_button)
         pygame.draw.rect(screen, BLACK, self.normal_button, 2)
 
         normal_title = self.button_font.render("NORMAL MODE", True, BLACK)
@@ -115,8 +133,9 @@ class GameModeSelection:
                                          y=self.normal_button.bottom + 15 + i * 20)
             screen.blit(desc_text, desc_rect)
 
-        # Draw sandbox mode button and description
-        pygame.draw.rect(screen, BLUE, self.sandbox_button)
+        # Draw sandbox mode button with hover effect
+        sandbox_color = (100, 160, 255) if self.sandbox_button.collidepoint(mouse_pos) else BLUE
+        pygame.draw.rect(screen, sandbox_color, self.sandbox_button)
         pygame.draw.rect(screen, BLACK, self.sandbox_button, 2)
 
         sandbox_title = self.button_font.render("SANDBOX MODE", True, BLACK)
@@ -137,8 +156,9 @@ class GameModeSelection:
                                          y=self.sandbox_button.bottom + 15 + i * 20)
             screen.blit(desc_text, desc_rect)
 
-        # Draw back button
-        pygame.draw.rect(screen, GRAY, self.back_button)
+        # Draw back button with hover effect
+        back_color = (170, 170, 170) if self.back_button.collidepoint(mouse_pos) else GRAY
+        pygame.draw.rect(screen, back_color, self.back_button)
         pygame.draw.rect(screen, BLACK, self.back_button, 2)
 
         back_text = self.button_font.render("Back", True, BLACK)

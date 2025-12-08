@@ -4,6 +4,8 @@ A tower defense game inspired by Bloons TD6, built with Python and Pygame.
 
 ## Features
 
+### Core Gameplay
+
 - **Core Gameplay Loop**: Spawn waves of bloons, place towers, defend your base
 - **Multiple Bloon Types**: Red, Blue, Green, and Yellow bloons with different health and speed
 - **Tower System**: Place towers to automatically target and shoot at bloons
@@ -11,6 +13,16 @@ A tower defense game inspired by Bloons TD6, built with Python and Pygame.
 - **Resource Management**: Earn money by popping bloons, spend money to place towers
 - **Path Following**: Bloons follow a predefined path from spawn to end
 - **Projectile System**: Towers fire projectiles that track and hit bloons
+
+### Cloud Features (New!)
+
+- **Google Sign-In**: Secure OAuth 2.0 authentication
+- **Cloud Save/Load**: Sync your game progress across devices
+- **Stats Tracking**: Track your performance and achievements
+- **Settings Sync**: Your preferences follow you everywhere
+- **Leaderboards**: Compete with players globally (possibly in the future)
+- **Guest Mode**: Play without an account
+- **Offline Mode**: Full functionality without internet
 
 ## How to Play
 
@@ -127,7 +139,7 @@ python __main__.py
 
 ## Technical Details
 
-- **Resolution**: 1280x720 (fixed)
+- **Resolution**: 1280x720
 - **Frame Rate**: 60 FPS
 - **Map Format**: JSON files in the `maps/` directory
 - **Path System**: Bloons follow waypoints defined in the map data
@@ -143,12 +155,9 @@ python __main__.py
 
 ## Future Enhancements
 
-The current implementation focuses on core gameplay. Potential additions include:
-
-- Tower upgrades and different tower types
-- More bloon types with special abilities
+- More tower types and upgrades
+- Additional bloon types with special abilities
 - Sound effects and music
-- Multiple maps
-- Achievement system
-- Save/load functionality
-- Special abilities and power-ups
+- Multiple maps and game modes
+- Mobile support? (Unlikely. Would need to port game to mobile compatible language / SDK)
+- Multiplayer co-op mode (Low chance, not impossible. Would need a lot of work on a serverside, possibly building off of my firebase app)
