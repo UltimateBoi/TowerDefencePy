@@ -175,10 +175,7 @@ class GoogleOAuthClient:
         """Initialize OAuth client with public client ID."""
         # This OAuth Client ID is public and safe to include in source code
         # It's restricted to only work with your authorized redirect URIs
-        self.client_id = os.getenv(
-            'GOOGLE_CLIENT_ID',
-            '1234567890-abcdefghijklmnopqrstuvwxyz123456.apps.googleusercontent.com'  # Replace with your public client ID
-        )
+        self.client_id = '355390221704-gkvfrchgj6plf2e4jahehlthig9su4h5.apps.googleusercontent.com'
         self.redirect_uri = 'http://localhost:8080'
         self.scope = 'openid email profile'
     

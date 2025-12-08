@@ -1,19 +1,19 @@
 """
-Login Screen UI
-Provides Google Sign-In authentication interface for Firebase.
+Login Screen UI (Backend API Version)
+Uses backend API for authentication - no Firebase credentials needed client-side.
 """
 
 import pygame
 import sys
 import webbrowser
 from typing import Optional, Tuple
-from game.services.firebase_service import firebase_service
-from game.services.google_auth_service import google_auth_service
+from game.services.backend_client import backend_client
+from game.services.google_oauth_client import google_oauth_client
 from game.services.session_manager import session_manager
 
 
 class LoginScreen:
-    """Login screen for user authentication."""
+    """Login screen for user authentication via backend API."""
     
     def __init__(self, screen: pygame.Surface, skip_auto_login: bool = False):
         """
@@ -54,7 +54,6 @@ class LoginScreen:
         self.error_message = ""
         self.info_message = ""
         self.loading = False
-        self.oauth_setup_required = False
         
         # Check for existing session
         self.auto_login_attempted = False
@@ -88,94 +87,123 @@ class LoginScreen:
         try:
             self.info_message = "Opening browser for Google Sign-In..."
             self.loading = True
+            self.draw()
             pygame.display.flip()
             
-            # Perform Google OAuth flow
-            user_info = google_auth_service.sign_in_with_google()
+            # Perform Google OAuth flow (client-side only)
+            id_token = google_oauth_client.sign_in_with_google()
             
-            if user_info:
-                # Extract user details
-                email = user_info.get('email', 'unknown@gmail.com')
-                display_name = user_info.get('name', email.split('@')[0])
-                user_id = user_info.get('sub', user_info.get('id', ''))
+            if id_token:
+                self.info_message = "Verifying with server..."
+                self.draw()
+                pygame.display.flip()
                 
-                # Set current user in Firebase service
-                firebase_service.set_current_user(
-                    user_id=f"google_{user_id}",
-                    email=email,
-                    display_name=display_name
-                )
-                
-                # Save session for persistence
-                session_data = {
-                    'user_id': f"google_{user_id}",
-                    'email': email,
-                    'display_name': display_name,
-                    'id_token': user_info.get('id_token'),
-                    'access_token': user_info.get('access_token'),
-                    'refresh_token': user_info.get('refresh_token'),
-                }
-                session_manager.save_session(session_data)
-                
-                print(f"Successfully logged in as: {display_name} ({email})")
-                self.info_message = f"Welcome, {display_name}!"
-                self.loading = False
-                return 'continue'
+                # Verify token with backend
+                if backend_client.set_id_token(id_token):
+                    user = backend_client.get_current_user()
+                    
+                    if user:
+                        display_name = user.get('displayName', 'Player')
+                        
+                        # Save session
+                        session_manager.save_session({
+                            'id_token': id_token,
+                            'user': user
+                        })
+                        
+                        self.info_message = f"Welcome, {display_name}!"
+                        self.loading = False
+                        self.draw()
+                        pygame.display.flip()
+                        pygame.time.wait(1000)
+                        
+                        return 'continue'
+                    else:
+                        self.error_message = "Failed to get user information"
+                else:
+                    self.error_message = "Authentication failed. Please try again."
             else:
                 self.error_message = "Google Sign-In was cancelled or failed"
-                self.loading = False
-                return None
+            
+            self.loading = False
             
         except Exception as e:
+            print(f"Error during Google Sign-In: {e}")
             self.error_message = f"Sign-in error: {str(e)}"
             self.loading = False
-            print(f"ERROR: Error during sign-in: {e}")
-            return None
+        
+        return None
     
-    def _login_as_guest(self) -> str:
-        """Login as a guest user."""
-        import time
-        guest_id = f"guest_{int(time.time())}"
-        
-        firebase_service.set_current_user(
-            user_id=guest_id,
-            email=f"{guest_id}@guest.local",
-            display_name=f"Guest_{int(time.time()) % 10000}"
-        )
-        
-        print(f"Logged in as guest: {guest_id}")
+    def _login_as_guest(self) -> Optional[str]:
+        """
+        Continue as guest (offline mode).
+        """
+        self.info_message = "Playing as guest (offline mode)"
+        backend_client.offline_mode = True
         return 'continue'
+    
+    def _try_auto_login(self):
+        """Attempt to restore previous session."""
+        if self.auto_login_attempted or self.skip_auto_login:
+            return
+        
+        self.auto_login_attempted = True
+        
+        if not session_manager.has_session():
+            return
+        
+        self.info_message = "Restoring session..."
+        self.draw()
+        pygame.display.flip()
+        
+        try:
+            session = session_manager.load_session()
+            
+            if session and 'id_token' in session:
+                # Verify token with backend
+                if backend_client.set_id_token(session['id_token']):
+                    user = backend_client.get_current_user()
+                    
+                    if user:
+                        display_name = user.get('displayName', 'Player')
+                        self.info_message = f"Welcome back, {display_name}!"
+                        self.draw()
+                        pygame.display.flip()
+                        pygame.time.wait(1000)
+                        
+                        # Session restored successfully
+                        return
+                
+                # Token invalid, clear session
+                session_manager.clear_session()
+                self.info_message = "Session expired. Please sign in again."
+        
+        except Exception as e:
+            print(f"Error restoring session: {e}")
+            self.info_message = "Could not restore session"
     
     def draw(self):
         """Draw the login screen."""
         self.screen.fill(self.bg_color)
         
-        # Title
+        # Draw title
         title = self.title_font.render("Tower Defense", True, self.text_color)
-        title_rect = title.get_rect(center=(self.width // 2, 100))
+        title_rect = title.get_rect(center=(self.width // 2, self.height // 3))
         self.screen.blit(title, title_rect)
         
-        # Subtitle
-        subtitle = self.font.render("Sign in to sync your progress across devices", True, self.info_color)
-        subtitle_rect = subtitle.get_rect(center=(self.width // 2, 160))
+        # Draw subtitle
+        subtitle = self.font.render("Please sign in to continue", True, self.info_color)
+        subtitle_rect = subtitle.get_rect(center=(self.width // 2, self.height // 3 + 60))
         self.screen.blit(subtitle, subtitle_rect)
         
+        # Get mouse position for hover effects
         mouse_pos = pygame.mouse.get_pos()
         
-        # Update cursor based on hover
-        hovering = (self.google_button.collidepoint(mouse_pos) or 
-                   self.guest_button.collidepoint(mouse_pos) or 
-                   self.skip_button.collidepoint(mouse_pos))
-        if hovering:
-            pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_HAND)
-        else:
-            pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_ARROW)
-        
-        # Google Sign-In button
+        # Draw Google Sign-In button
         google_color = self.google_button_hover if self.google_button.collidepoint(mouse_pos) else self.google_button_color
         pygame.draw.rect(self.screen, google_color, self.google_button, border_radius=8)
         
-        # Google logo placeholder (G icon)
+        # Google logo (G icon)
         icon_size = 40
         icon_rect = pygame.Rect(
             self.google_button.x + 20,
@@ -191,128 +219,63 @@ class LoginScreen:
         g_rect = g_text.get_rect(center=icon_rect.center)
         self.screen.blit(g_text, g_rect)
         
-        # Google button text
+        # Google button text (offset to the right of icon)
         google_text = self.font.render("Sign in with Google", True, self.text_color)
         text_x = self.google_button.x + 80
         text_y = self.google_button.centery - google_text.get_height() // 2
         self.screen.blit(google_text, (text_x, text_y))
         
-        # Guest button
+        # Draw Guest button
         guest_color = self.guest_button_hover if self.guest_button.collidepoint(mouse_pos) else self.guest_button_color
         pygame.draw.rect(self.screen, guest_color, self.guest_button, border_radius=8)
-        guest_text = self.font.render("Continue as Guest", True, self.text_color)
+        
+        guest_text = self.small_font.render("Continue as Guest (Offline)", True, self.text_color)
         guest_text_rect = guest_text.get_rect(center=self.guest_button.center)
         self.screen.blit(guest_text, guest_text_rect)
         
-        # Skip button (play offline)
-        skip_color = (100, 100, 100) if self.skip_button.collidepoint(mouse_pos) else (70, 70, 70)
-        pygame.draw.rect(self.screen, skip_color, self.skip_button, border_radius=5)
-        skip_text = self.small_font.render("Play Offline", True, (200, 200, 200))
+        # Draw Skip button
+        skip_color = (80, 80, 90) if self.skip_button.collidepoint(mouse_pos) else (60, 60, 70)
+        pygame.draw.rect(self.screen, skip_color, self.skip_button, border_radius=6)
+        
+        skip_text = self.small_font.render("Skip", True, self.text_color)
         skip_text_rect = skip_text.get_rect(center=self.skip_button.center)
         self.screen.blit(skip_text, skip_text_rect)
         
-        # Error message
-        if self.error_message:
-            error_surface = self.small_font.render(self.error_message, True, self.error_color)
-            error_rect = error_surface.get_rect(center=(self.width // 2, self.height // 2 + 280))
-            self.screen.blit(error_surface, error_rect)
-        
-        # Info message
-        if self.info_message:
-            info_surface = self.small_font.render(self.info_message, True, self.info_color)
-            info_rect = info_surface.get_rect(center=(self.width // 2, self.height // 2 + 250))
-            self.screen.blit(info_surface, info_rect)
-        
-        # Error message
-        if self.error_message:
-            error_y = self.height // 2 + 310
-            error_text = self.small_font.render(self.error_message, True, self.error_color)
-            error_rect = error_text.get_rect(center=(self.width // 2, error_y))
-            self.screen.blit(error_text, error_rect)
-        
-        # Info message (loading, etc.)
-        if self.info_message:
-            info_y = self.height // 2 + 310 if not self.error_message else self.height // 2 + 340
-            info_text_surface = self.small_font.render(self.info_message, True, (100, 200, 255))
-            info_text_rect = info_text_surface.get_rect(center=(self.width // 2, info_y))
-            self.screen.blit(info_text_surface, info_text_rect)
-        
-        # Loading indicator
+        # Draw info/error messages
         if self.loading:
-            loading_text = self.font.render("Authenticating...", True, (100, 200, 255))
-            loading_rect = loading_text.get_rect(center=(self.width // 2, self.height // 2 - 80))
+            loading_text = self.font.render("Loading...", True, self.info_color)
+            loading_rect = loading_text.get_rect(center=(self.width // 2, self.height - 150))
             self.screen.blit(loading_text, loading_rect)
         
-        # Bottom info text
-        info_text = self.small_font.render("Secure cloud sync with Google account", True, (150, 150, 150))
-        info_rect = info_text.get_rect(center=(self.width // 2, self.height - 130))
-        self.screen.blit(info_text, info_rect)
+        if self.info_message:
+            info_text = self.small_font.render(self.info_message, True, self.info_color)
+            info_rect = info_text.get_rect(center=(self.width // 2, self.height - 150))
+            self.screen.blit(info_text, info_rect)
         
-        pygame.display.flip()
+        if self.error_message:
+            error_text = self.small_font.render(self.error_message, True, self.error_color)
+            error_rect = error_text.get_rect(center=(self.width // 2, self.height - 150))
+            self.screen.blit(error_text, error_rect)
+        
+        # Draw backend status indicator
+        status_color = (0, 200, 0) if backend_client.is_online() else (200, 0, 0)
+        status_text = "Online" if backend_client.is_online() else "Offline"
+        status_render = self.tiny_font.render(f"Backend: {status_text}", True, status_color)
+        self.screen.blit(status_render, (10, self.height - 25))
     
-    def _try_auto_login(self) -> Optional[str]:
-        """Attempt to restore previous session."""
-        if self.auto_login_attempted or self.skip_auto_login:
-            return None
-        
-        self.auto_login_attempted = True
-        
-        # Check if session exists
-        if not session_manager.has_session():
-            return None
-        
-        self.info_message = "Restoring previous session..."
-        self.loading = True
-        self.draw()
-        
-        try:
-            # Load session data
-            session_data = session_manager.load_session()
-            
-            if session_data:
-                user_id = session_data.get('user_id')
-                email = session_data.get('email')
-                display_name = session_data.get('display_name')
-                
-                # Restore user session
-                firebase_service.set_current_user(
-                    user_id=user_id,
-                    email=email,
-                    display_name=display_name
-                )
-                
-                print(f"Session restored: {display_name} ({email})")
-                self.info_message = f"Welcome back, {display_name}!"
-                self.loading = False
-                return 'continue'
-            else:
-                # Invalid session, clear it
-                session_manager.clear_session()
-                self.loading = False
-                return None
-                
-        except Exception as e:
-            print(f"Error restoring session: {e}")
-            session_manager.clear_session()
-            self.loading = False
-            self.error_message = "Session expired. Please sign in again."
-            return None
-    
-    def run(self) -> str:
-        """
-        Run the login screen loop.
-        
-        Returns:
-            'continue' when user is ready to proceed
-        """
-        clock = pygame.time.Clock()
-        
+    def run(self):
+        """Run the login screen loop."""
         # Try auto-login first
-        auto_login_result = self._try_auto_login()
-        if auto_login_result:
-            return auto_login_result
+        self._try_auto_login()
         
-        while True:
+        # If auto-login succeeded, exit immediately
+        if backend_client.get_current_user():
+            return
+        
+        clock = pygame.time.Clock()
+        running = True
+        
+        while running:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     pygame.quit()
@@ -320,7 +283,8 @@ class LoginScreen:
                 
                 result = self.handle_event(event)
                 if result == 'continue':
-                    return result
+                    running = False
             
             self.draw()
+            pygame.display.flip()
             clock.tick(60)
