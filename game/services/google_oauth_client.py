@@ -236,44 +236,24 @@ class GoogleOAuthClient:
     
     def _exchange_code_for_token(self, code: str) -> Optional[Dict]:
         """
-        Exchange authorization code for tokens.
-        Requires client secret from environment or OAuth credentials file.
+        Exchange authorization code for tokens via backend server.
+        This keeps the client secret secure on the server.
         """
-        # Try to load client secret
-        client_secret = os.getenv('GOOGLE_CLIENT_SECRET')
-        
-        if not client_secret:
-            # Try to load from OAuth credentials file
-            try:
-                with open('google-oauth-credentials.json', 'r') as f:
-                    creds = json.load(f)
-                    web_config = creds.get('web', creds.get('installed', {}))
-                    client_secret = web_config.get('client_secret')
-            except Exception:
-                pass
-        
-        if not client_secret:
-            print("Error: Google Client Secret not found. Cannot exchange code for token.")
-            print("Please set GOOGLE_CLIENT_SECRET environment variable or provide google-oauth-credentials.json")
-            return None
-        
-        token_url = 'https://oauth2.googleapis.com/token'
-        
-        data = {
-            'code': code,
-            'client_id': self.client_id,
-            'client_secret': client_secret,
-            'redirect_uri': self.redirect_uri,
-            'grant_type': 'authorization_code'
-        }
+        # Get backend URL from environment or use default
+        backend_url = os.getenv('BACKEND_API_URL', 'https://towerdefencepy.onrender.com')
         
         try:
-            response = requests.post(token_url, data=data, timeout=10)
+            response = requests.post(
+                f'{backend_url}/api/auth/exchange-code',
+                json={'code': code},
+                timeout=10
+            )
             
             if response.status_code == 200:
                 return response.json()
             else:
-                print(f"Token exchange failed: {response.json()}")
+                error_data = response.json()
+                print(f"Token exchange failed: {error_data.get('error')}")
                 return None
         
         except Exception as e:

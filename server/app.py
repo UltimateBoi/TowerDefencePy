@@ -66,6 +66,46 @@ def health_check():
     })
 
 
+@app.route('/api/auth/exchange-code', methods=['POST'])
+def exchange_code():
+    """Exchange OAuth authorization code for ID token."""
+    import requests as req
+    
+    data = request.json
+    code = data.get('code')
+    
+    if not code:
+        return jsonify({'error': 'No authorization code provided'}), 400
+    
+    # Get Google OAuth credentials from environment
+    client_id = os.getenv('GOOGLE_CLIENT_ID')
+    client_secret = os.getenv('GOOGLE_CLIENT_SECRET')
+    
+    if not client_id or not client_secret:
+        return jsonify({'error': 'OAuth credentials not configured on server'}), 500
+    
+    # Exchange code for tokens
+    token_url = 'https://oauth2.googleapis.com/token'
+    token_data = {
+        'code': code,
+        'client_id': client_id,
+        'client_secret': client_secret,
+        'redirect_uri': 'http://localhost:8080',
+        'grant_type': 'authorization_code'
+    }
+    
+    try:
+        response = req.post(token_url, data=token_data, timeout=10)
+        
+        if response.status_code == 200:
+            return jsonify(response.json())
+        else:
+            return jsonify({'error': 'Token exchange failed', 'details': response.json()}), 400
+    
+    except Exception as e:
+        return jsonify({'error': 'Token exchange error', 'details': str(e)}), 500
+
+
 @app.route('/api/auth/verify', methods=['POST'])
 def verify_token():
     """Verify a Google OAuth token and return user info."""
