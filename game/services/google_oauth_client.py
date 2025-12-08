@@ -68,13 +68,7 @@ class GoogleAuthHandler(BaseHTTPRequestHandler):
                     .checkmark {
                         width: 80px;
                         height: 80px;
-                        border-radius: 50%;
-                        background: #4CAF50;
                         margin: 0 auto 1.5rem;
-                        display: flex;
-                        align-items: center;
-                        justify-content: center;
-                        font-size: 3rem;
                         animation: scaleIn 0.3s ease-out 0.2s both;
                     }
                     @keyframes scaleIn {
@@ -88,7 +82,12 @@ class GoogleAuthHandler(BaseHTTPRequestHandler):
             </head>
             <body>
                 <div class="container">
-                    <div class="checkmark">✓</div>
+                    <div class="checkmark">
+                        <svg width="80" height="80" viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg">
+                            <circle cx="40" cy="40" r="38" fill="#4CAF50" stroke="#fff" stroke-width="2"/>
+                            <path d="M 25 40 L 35 50 L 55 30" stroke="#fff" stroke-width="4" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </div>
                     <h1>Login Successful!</h1>
                     <p>You can now close this window and return to the game.</p>
                     <p class="note">This window will close automatically in 3 seconds...</p>
@@ -136,13 +135,7 @@ class GoogleAuthHandler(BaseHTTPRequestHandler):
                     .error-icon {{
                         width: 80px;
                         height: 80px;
-                        border-radius: 50%;
-                        background: #f44336;
                         margin: 0 auto 1.5rem;
-                        display: flex;
-                        align-items: center;
-                        justify-content: center;
-                        font-size: 3rem;
                     }}
                     h1 {{ font-size: 2rem; margin-bottom: 1rem; }}
                     p {{ font-size: 1.1rem; opacity: 0.9; }}
@@ -150,7 +143,12 @@ class GoogleAuthHandler(BaseHTTPRequestHandler):
             </head>
             <body>
                 <div class="container">
-                    <div class="error-icon">✗</div>
+                    <div class="error-icon">
+                        <svg width="80" height="80" viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg">
+                            <circle cx="40" cy="40" r="38" fill="#f44336" stroke="#fff" stroke-width="2"/>
+                            <path d="M 28 28 L 52 52 M 52 28 L 28 52" stroke="#fff" stroke-width="4" stroke-linecap="round"/>
+                        </svg>
+                    </div>
                     <h1>Login Failed</h1>
                     <p>Error: {error}</p>
                     <p style="margin-top: 1rem;">Please close this window and try again.</p>

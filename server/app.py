@@ -108,36 +108,53 @@ def exchange_code():
 
 @app.route('/api/auth/verify', methods=['POST'])
 def verify_token():
-    """Verify a Google OAuth token and return user info."""
-    data = request.json
-    id_token = data.get('idToken')
+    """Verify a Google OAuth ID token and return user info."""
+    import requests as req
+    from google.oauth2 import id_token
+    from google.auth.transport import requests as google_requests
     
-    if not id_token:
+    data = request.json
+    token = data.get('idToken')
+    
+    if not token:
         return jsonify({'error': 'No ID token provided'}), 400
     
     try:
-        # Verify the ID token with Firebase
-        decoded_token = auth.verify_id_token(id_token)
+        # Verify the Google ID token
+        client_id = os.getenv('GOOGLE_CLIENT_ID')
         
-        # Get or create user document
-        user_id = decoded_token['uid']
-        user_ref = db.collection('users').document(user_id)
+        # Verify with Google's token verification endpoint
+        idinfo = id_token.verify_oauth2_token(
+            token, 
+            google_requests.Request(), 
+            client_id
+        )
+        
+        # Extract user info from token
+        user_id = idinfo['sub']
+        email = idinfo.get('email', '')
+        display_name = idinfo.get('name', email.split('@')[0])
+        photo_url = idinfo.get('picture', '')
+        email_verified = idinfo.get('email_verified', False)
+        
+        # Get or create user document in Firestore
+        user_ref = db.collection('users').document(f"google_{user_id}")
         user_doc = user_ref.get()
         
         user_data = {
-            'uid': user_id,
-            'email': decoded_token.get('email'),
-            'displayName': decoded_token.get('name'),
-            'photoURL': decoded_token.get('picture'),
-            'emailVerified': decoded_token.get('email_verified', False)
+            'uid': f"google_{user_id}",
+            'email': email,
+            'displayName': display_name,
+            'photoURL': photo_url,
+            'emailVerified': email_verified
         }
         
         # Create user document if it doesn't exist
         if not user_doc.exists:
             user_ref.set({
-                'email': user_data['email'],
-                'displayName': user_data['displayName'],
-                'photoURL': user_data.get('photoURL'),
+                'email': email,
+                'displayName': display_name,
+                'photoURL': photo_url,
                 'createdAt': firestore.SERVER_TIMESTAMP,
                 'lastLogin': firestore.SERVER_TIMESTAMP
             })

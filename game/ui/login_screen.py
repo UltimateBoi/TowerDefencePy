@@ -43,6 +43,7 @@ class LoginScreen:
         self.font = pygame.font.SysFont('Arial', 24)
         self.small_font = pygame.font.SysFont('Arial', 18)
         self.tiny_font = pygame.font.SysFont('Arial', 14)
+        self.g_font = pygame.font.SysFont('Arial', 28, bold=True)
         
         # Buttons
         button_y_start = self.height // 2 + 20
@@ -54,9 +55,42 @@ class LoginScreen:
         self.error_message = ""
         self.info_message = ""
         self.loading = False
+        self.current_hover = None  # Track hover state to avoid redundant updates
         
         # Check for existing session
         self.auto_login_attempted = False
+        
+        # Pre-render static text surfaces (cache)
+        self._cache_static_surfaces()
+    
+    def _cache_static_surfaces(self):
+        """Pre-render static text to improve performance."""
+        # Title and subtitle (never change)
+        self.title_surface = self.title_font.render("Tower Defense", True, self.text_color)
+        self.title_rect = self.title_surface.get_rect(center=(self.width // 2, self.height // 3))
+        
+        self.subtitle_surface = self.font.render("Please sign in to continue", True, self.info_color)
+        self.subtitle_rect = self.subtitle_surface.get_rect(center=(self.width // 2, self.height // 3 + 60))
+        
+        # Button text (never changes)
+        self.google_text_surface = self.font.render("Sign in with Google", True, self.text_color)
+        self.guest_text_surface = self.small_font.render("Continue as Guest (Offline)", True, self.text_color)
+        self.skip_text_surface = self.small_font.render("Skip", True, self.text_color)
+        
+        # Google "G" icon text
+        self.g_text_surface = self.g_font.render("G", True, self.google_button_color)
+        
+        # Calculate positions once
+        self.google_text_pos = (
+            self.google_button.x + 80,
+            self.google_button.centery - self.google_text_surface.get_height() // 2
+        )
+        self.guest_text_rect = self.guest_text_surface.get_rect(center=self.guest_button.center)
+        self.skip_text_rect = self.skip_text_surface.get_rect(center=self.skip_button.center)
+        
+        # Google icon circle position
+        self.icon_center = (self.google_button.x + 40, self.google_button.y + 30)
+        self.g_text_rect = self.g_text_surface.get_rect(center=self.icon_center)
         
     def handle_event(self, event: pygame.event.Event) -> Optional[str]:
         """
@@ -186,60 +220,49 @@ class LoginScreen:
         """Draw the login screen."""
         self.screen.fill(self.bg_color)
         
-        # Draw title
-        title = self.title_font.render("Tower Defense", True, self.text_color)
-        title_rect = title.get_rect(center=(self.width // 2, self.height // 3))
-        self.screen.blit(title, title_rect)
-        
-        # Draw subtitle
-        subtitle = self.font.render("Please sign in to continue", True, self.info_color)
-        subtitle_rect = subtitle.get_rect(center=(self.width // 2, self.height // 3 + 60))
-        self.screen.blit(subtitle, subtitle_rect)
+        # Draw cached static text
+        self.screen.blit(self.title_surface, self.title_rect)
+        self.screen.blit(self.subtitle_surface, self.subtitle_rect)
         
         # Get mouse position for hover effects
         mouse_pos = pygame.mouse.get_pos()
         
+        # Update cursor only when hover state changes
+        new_hover = None
+        if self.google_button.collidepoint(mouse_pos):
+            new_hover = 'google'
+        elif self.guest_button.collidepoint(mouse_pos):
+            new_hover = 'guest'
+        elif self.skip_button.collidepoint(mouse_pos):
+            new_hover = 'skip'
+        
+        if new_hover != self.current_hover:
+            if new_hover:
+                pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_HAND)
+            else:
+                pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_ARROW)
+            self.current_hover = new_hover
+        
         # Draw Google Sign-In button
-        google_color = self.google_button_hover if self.google_button.collidepoint(mouse_pos) else self.google_button_color
+        google_color = self.google_button_hover if new_hover == 'google' else self.google_button_color
         pygame.draw.rect(self.screen, google_color, self.google_button, border_radius=8)
         
-        # Google logo (G icon)
-        icon_size = 40
-        icon_rect = pygame.Rect(
-            self.google_button.x + 20,
-            self.google_button.y + 10,
-            icon_size,
-            icon_size
-        )
-        pygame.draw.circle(self.screen, (255, 255, 255), icon_rect.center, icon_size // 2)
+        # Google logo (G icon) - cached positions
+        pygame.draw.circle(self.screen, (255, 255, 255), self.icon_center, 20)
+        self.screen.blit(self.g_text_surface, self.g_text_rect)
         
-        # Draw "G" letter
-        g_font = pygame.font.SysFont('Arial', 28, bold=True)
-        g_text = g_font.render("G", True, self.google_button_color)
-        g_rect = g_text.get_rect(center=icon_rect.center)
-        self.screen.blit(g_text, g_rect)
-        
-        # Google button text (offset to the right of icon)
-        google_text = self.font.render("Sign in with Google", True, self.text_color)
-        text_x = self.google_button.x + 80
-        text_y = self.google_button.centery - google_text.get_height() // 2
-        self.screen.blit(google_text, (text_x, text_y))
+        # Google button text (cached surface and position)
+        self.screen.blit(self.google_text_surface, self.google_text_pos)
         
         # Draw Guest button
-        guest_color = self.guest_button_hover if self.guest_button.collidepoint(mouse_pos) else self.guest_button_color
+        guest_color = self.guest_button_hover if new_hover == 'guest' else self.guest_button_color
         pygame.draw.rect(self.screen, guest_color, self.guest_button, border_radius=8)
-        
-        guest_text = self.small_font.render("Continue as Guest (Offline)", True, self.text_color)
-        guest_text_rect = guest_text.get_rect(center=self.guest_button.center)
-        self.screen.blit(guest_text, guest_text_rect)
+        self.screen.blit(self.guest_text_surface, self.guest_text_rect)
         
         # Draw Skip button
-        skip_color = (80, 80, 90) if self.skip_button.collidepoint(mouse_pos) else (60, 60, 70)
+        skip_color = (80, 80, 90) if new_hover == 'skip' else (60, 60, 70)
         pygame.draw.rect(self.screen, skip_color, self.skip_button, border_radius=6)
-        
-        skip_text = self.small_font.render("Skip", True, self.text_color)
-        skip_text_rect = skip_text.get_rect(center=self.skip_button.center)
-        self.screen.blit(skip_text, skip_text_rect)
+        self.screen.blit(self.skip_text_surface, self.skip_text_rect)
         
         # Draw info/error messages
         if self.loading:
