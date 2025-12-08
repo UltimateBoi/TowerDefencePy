@@ -19,6 +19,13 @@ class InGameUpgradePanel:
         self.difficulty_multiplier = 1.0
         self.visible = False
         
+        # Cache fonts to avoid recreating them every frame (major performance improvement)
+        self.font_title = pygame.font.SysFont(None, 24)
+        self.font_name = pygame.font.SysFont(None, 20)
+        self.font_stats = pygame.font.SysFont(None, 16)
+        self.font_button = pygame.font.SysFont(None, 16)
+        self.font_instruction = pygame.font.SysFont(None, 14)
+        
         # Load tower data
         self.load_tower_data()
     
@@ -106,8 +113,7 @@ class InGameUpgradePanel:
         pygame.draw.rect(screen, (200, 200, 200), self.rect, 2, border_radius=10)
         
         # Title
-        font = pygame.font.SysFont(None, 24)
-        title = font.render("Tower Upgrades", True, (255, 255, 255))
+        title = self.font_title.render("Tower Upgrades", True, (255, 255, 255))
         title_rect = title.get_rect(centerx=self.rect.centerx, y=self.rect.y + 10)
         screen.blit(title, title_rect)
         
@@ -116,16 +122,14 @@ class InGameUpgradePanel:
             tower_data = self.towers_data[self.selected_tower.tower_type]
             tower_name = tower_data.get('name', 'Unknown Tower')
             
-            name_font = pygame.font.SysFont(None, 20)
-            name_text = name_font.render(tower_name, True, (255, 255, 255))
+            name_text = self.font_name.render(tower_name, True, (255, 255, 255))
             name_rect = name_text.get_rect(centerx=self.rect.centerx, y=self.rect.y + 35)
             screen.blit(name_text, name_rect)
         
         # Current stats
-        stats_font = pygame.font.SysFont(None, 16)
         stats_y = self.rect.y + 60
         stats_text = f"DMG: {self.selected_tower.damage}  RNG: {self.selected_tower.range}  SPD: {self.selected_tower.fire_rate:.1f}"
-        stats_surface = stats_font.render(stats_text, True, (200, 200, 200))
+        stats_surface = self.font_stats.render(stats_text, True, (200, 200, 200))
         stats_rect = stats_surface.get_rect(centerx=self.rect.centerx, y=stats_y)
         screen.blit(stats_surface, stats_rect)
         
@@ -157,21 +161,20 @@ class InGameUpgradePanel:
             pygame.draw.rect(screen, (255, 255, 255), button_rect, 1, border_radius=5)
             
             # Button text
-            btn_font = pygame.font.SysFont(None, 16)
             level_text = f"Lv {current_level}"
-            level_surface = btn_font.render(level_text, True, (255, 255, 255))
+            level_surface = self.font_button.render(level_text, True, (255, 255, 255))
             level_rect = level_surface.get_rect(centerx=button_rect.centerx, y=button_rect.y + 2)
             screen.blit(level_surface, level_rect)
             
             # Cost text
             if cost > 0:
                 cost_text = f"${cost}"
-                cost_surface = btn_font.render(cost_text, True, (255, 255, 0) if can_upgrade else (100, 100, 100))
+                cost_surface = self.font_button.render(cost_text, True, (255, 255, 0) if can_upgrade else (100, 100, 100))
                 cost_rect = cost_surface.get_rect(centerx=button_rect.centerx, y=button_rect.y + 15)
                 screen.blit(cost_surface, cost_rect)
             else:
                 max_text = "MAX"
-                max_surface = btn_font.render(max_text, True, (200, 200, 200))
+                max_surface = self.font_button.render(max_text, True, (200, 200, 200))
                 max_rect = max_surface.get_rect(centerx=button_rect.centerx, y=button_rect.y + 15)
                 screen.blit(max_surface, max_rect)
             
@@ -179,15 +182,14 @@ class InGameUpgradePanel:
             setattr(self, f"{path}_button", button_rect)
         
         # Instructions
-        instr_font = pygame.font.SysFont(None, 14)
         instr_text = "Click upgrade buttons to improve tower"
-        instr_surface = instr_font.render(instr_text, True, (150, 150, 150))
+        instr_surface = self.font_instruction.render(instr_text, True, (150, 150, 150))
         instr_rect = instr_surface.get_rect(centerx=self.rect.centerx, y=self.rect.y + 135)
         screen.blit(instr_surface, instr_rect)
         
         # Money display
         money_text = f"Money: ${player_money}"
-        money_surface = stats_font.render(money_text, True, (255, 255, 0))
+        money_surface = self.font_stats.render(money_text, True, (255, 255, 0))
         money_rect = money_surface.get_rect(centerx=self.rect.centerx, y=self.rect.y + 155)
         screen.blit(money_surface, money_rect)
         
@@ -195,7 +197,7 @@ class InGameUpgradePanel:
         if self.selected_tower:
             sell_price = self.selected_tower.get_sell_price()
             sell_text = f"Sell value: ${sell_price} (X key)"
-            sell_surface = stats_font.render(sell_text, True, (255, 100, 100))
+            sell_surface = self.font_stats.render(sell_text, True, (255, 100, 100))
             sell_rect = sell_surface.get_rect(centerx=self.rect.centerx, y=self.rect.y + 175)
             screen.blit(sell_surface, sell_rect)
     

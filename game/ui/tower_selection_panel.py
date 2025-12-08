@@ -10,7 +10,21 @@ from typing import Dict, List, Optional, Tuple, TYPE_CHECKING
 class TowerButton:
     """Represents a tower selection button"""
     
+    # Cache fonts at class level so all buttons share them
+    _font_name = None
+    _font_cost = None
+    
+    @classmethod
+    def _init_fonts(cls):
+        """Initialize cached fonts (called once)"""
+        if cls._font_name is None:
+            cls._font_name = pygame.font.SysFont(None, 18)
+            cls._font_cost = pygame.font.SysFont(None, 16)
+    
     def __init__(self, tower_id: str, tower_data: Dict, x: int, y: int, width: int = 60, height: int = 80):
+        # Initialize fonts if not already done
+        TowerButton._init_fonts()
+        
         self.tower_id = tower_id
         self.tower_data = tower_data
         self.rect = pygame.Rect(x, y, width, height)
@@ -53,7 +67,6 @@ class TowerButton:
         pygame.draw.circle(screen, border_color, icon_center, icon_radius, 2)
 
         # Tower name (shortened)
-        font = pygame.font.SysFont(None, 18)
         name = self.tower_data.get('name', 'Tower')
         # Shorten long names
         if len(name) > 10:
@@ -63,15 +76,14 @@ class TowerButton:
                 name = name.replace(' Shooter', '')
 
         name_color = (255, 255, 255) if self.affordable else (100, 100, 100)
-        name_text = font.render(name, True, name_color)
+        name_text = self._font_name.render(name, True, name_color)
         name_rect = name_text.get_rect(centerx=self.rect.centerx, y=self.rect.y + 56)
         screen.blit(name_text, name_rect)
 
         # Cost
-        cost_font = pygame.font.SysFont(None, 16)
         cost = self.tower_data.get('base_cost', 0)
         cost_color = (255, 255, 0) if self.affordable else (100, 100, 50)
-        cost_text = cost_font.render(f"${cost}", True, cost_color)
+        cost_text = self._font_cost.render(f"${cost}", True, cost_color)
         cost_rect = cost_text.get_rect(centerx=self.rect.centerx, y=self.rect.y + 76)
         screen.blit(cost_text, cost_rect)
     
@@ -93,6 +105,11 @@ class TowerSelectionPanel:
 
         self.button_spacing = 10
         self.visible = True  # Toggleable visibility
+
+        # Cache fonts for better performance
+        self.font_toggle = pygame.font.SysFont(None, 16)
+        self.font_cost = pygame.font.SysFont(None, 24)
+        self.font_afford = pygame.font.SysFont(None, 20)
 
         # Load tower data
         self.towers_data: Dict = {}
@@ -229,9 +246,8 @@ class TowerSelectionPanel:
         pygame.draw.rect(screen, (255, 255, 255), self.toggle_button_rect, 2, border_radius=3)
         
         # Toggle button icon (+ or -)
-        font = pygame.font.SysFont(None, 16)
         icon = "-" if self.visible else "+"
-        icon_text = font.render(icon, True, (255, 255, 255))
+        icon_text = self.font_toggle.render(icon, True, (255, 255, 255))
         icon_rect = icon_text.get_rect(center=self.toggle_button_rect.center)
         screen.blit(icon_text, icon_rect)
     
@@ -282,15 +298,13 @@ class TowerSelectionPanel:
         
         # Cost display
         if affordable:
-            cost_font = pygame.font.SysFont(None, 24)
-            cost_text = cost_font.render(f"${cost}", True, (255, 255, 255))
+            cost_text = self.font_cost.render(f"${cost}", True, (255, 255, 255))
             cost_rect = cost_text.get_rect(center=(mouse_pos[0], mouse_pos[1] - tower_radius - 20))
             pygame.draw.rect(screen, (0, 0, 0, 128), cost_rect.inflate(4, 2))
             screen.blit(cost_text, cost_rect)
         else:
             # "Can't afford" message
-            afford_font = pygame.font.SysFont(None, 20)
-            afford_text = afford_font.render("Can't afford", True, (255, 255, 255))
+            afford_text = self.font_afford.render("Can't afford", True, (255, 255, 255))
             afford_rect = afford_text.get_rect(center=(mouse_pos[0], mouse_pos[1] - tower_radius - 20))
             pygame.draw.rect(screen, (0, 0, 0, 128), afford_rect.inflate(4, 2))
             screen.blit(afford_text, afford_rect)

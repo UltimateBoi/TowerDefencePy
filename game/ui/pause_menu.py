@@ -15,10 +15,11 @@ class SettingsMenu:
         # Settings state
         self.auto_start_rounds = False
         self.drag_drop_placement = False # False = click to place, True = drag and drop
+        self.show_fps = False
         
         # Menu dimensions
         self.menu_width = 600
-        self.menu_height = 500 # Increased height for new setting
+        self.menu_height = 600 # Increased height for new setting
         self.menu_x = (SCREEN_WIDTH - self.menu_width) // 2
         self.menu_y = (SCREEN_HEIGHT - self.menu_height) // 2
         
@@ -38,6 +39,12 @@ class SettingsMenu:
         self.placement_label_y = self.menu_y + 160
         self.placement_toggle_x = self.menu_x + self.menu_width - 80
         self.placement_toggle_y = self.placement_label_y + 5
+        
+        # FPS counter setting position
+        self.fps_label_x = self.menu_x + 30
+        self.fps_label_y = self.menu_y + 220
+        self.fps_toggle_x = self.menu_x + self.menu_width - 80
+        self.fps_toggle_y = self.fps_label_y + 5
         
         # Back button
         self.back_button = pygame.Rect(
@@ -77,6 +84,15 @@ class SettingsMenu:
         if placement_toggle_rect.collidepoint(mouse_pos):
             self.drag_drop_placement = not self.drag_drop_placement
             return "toggle_placement_mode"
+        
+        # Check FPS counter toggle
+        fps_toggle_rect = pygame.Rect(
+            self.fps_toggle_x, self.fps_toggle_y,
+            self.toggle_size, self.toggle_size
+        )
+        if fps_toggle_rect.collidepoint(mouse_pos):
+            self.show_fps = not self.show_fps
+            return "toggle_fps_counter"
             
         # Check back button
         if self.back_button.collidepoint(mouse_pos):
@@ -155,6 +171,31 @@ class SettingsMenu:
         mode_text = "Drag and Drop" if self.drag_drop_placement else "Click to Place"
         placement_desc_text = self.button_font.render(f"Current mode: {mode_text}", True, GRAY)
         screen.blit(placement_desc_text, (self.placement_label_x, self.placement_label_y + 30))
+        
+        # Draw FPS counter setting
+        fps_text = self.label_font.render("Show FPS Counter:", True, BLACK)
+        screen.blit(fps_text, (self.fps_label_x, self.fps_label_y))
+        
+        # Draw FPS toggle checkbox
+        fps_toggle_rect = pygame.Rect(
+            self.fps_toggle_x, self.fps_toggle_y,
+            self.toggle_size, self.toggle_size
+        )
+        pygame.draw.rect(screen, WHITE, fps_toggle_rect)
+        pygame.draw.rect(screen, BLACK, fps_toggle_rect, 2)
+        
+        if self.show_fps:
+            # Draw checkmark
+            pygame.draw.line(screen, (0, 150, 0), 
+                           (self.fps_toggle_x + 4, self.fps_toggle_y + 10),
+                           (self.fps_toggle_x + 8, self.fps_toggle_y + 14), 3)
+            pygame.draw.line(screen, (0, 150, 0),
+                           (self.fps_toggle_x + 8, self.fps_toggle_y + 14),
+                           (self.fps_toggle_x + 16, self.fps_toggle_y + 6), 3)
+        
+        # Draw FPS description
+        fps_desc_text = self.button_font.render("Display frames per second in top-right corner", True, GRAY)
+        screen.blit(fps_desc_text, (self.fps_label_x, self.fps_label_y + 30))
         
         # Draw back button
         self._draw_button(screen, self.back_button, "Back", (150, 150, 150))

@@ -55,6 +55,13 @@ class TowerDefenseGame:
         self.clock = pygame.time.Clock()
         self.running = True
         
+        # Performance optimizations - cache fonts
+        self.cached_fonts = {
+            'large': pygame.font.SysFont(None, 72),
+            'medium': pygame.font.SysFont(None, 36),
+            'small': pygame.font.SysFont(None, 24)
+        }
+        
         # Game state
         self.money = STARTING_MONEY
         self.lives = STARTING_LIVES
@@ -66,6 +73,7 @@ class TowerDefenseGame:
         self.auto_start_rounds = False
         self.auto_start_delay = 3000 # 3 seconds delay before auto start
         self.wave_completed_time = 0 # Track when wave was completed
+        self.show_fps = False
         
         # Game objects
         self.load_map()
@@ -121,7 +129,7 @@ class TowerDefenseGame:
             
         self.game_map = GameMap(map_data)
     
-    def create_waves(self) -> List[Wave]:
+    def create_waves(self) -> List[Wave]: # TODO: create a system to load levels and their bloons from corresponding maps (including E/M/H Easy Medium Hard logic (/impossible))
         waves = []
         # Wave 1: 10 red bloons
         waves.append(Wave([BloonType.RED], [10], 800))
@@ -197,6 +205,8 @@ class TowerDefenseGame:
                         elif action == "toggle_placement_mode":
                             # Placement mode changed, deselect any current tower selection
                             self.tower_selection_panel.deselect_tower()
+                        elif action == "toggle_fps_counter":
+                            self.show_fps = self.settings_menu.show_fps
                     # Handle mode selection clicks
                     elif self.current_menu == "mode_selection":
                         action = self.mode_selection.handle_click(mouse_pos)
@@ -228,6 +238,7 @@ class TowerDefenseGame:
                             self.pause_menu.hide()
                             self.settings_menu.show()
                             self.settings_menu.auto_start_rounds = self.auto_start_rounds
+                            self.settings_menu.show_fps = self.show_fps
                             self.current_menu = "settings"
                         elif action == "main_menu":
                             self.running = False
@@ -418,14 +429,19 @@ class TowerDefenseGame:
                 # Clear dead bloons
                 self.bloons = [bloon for bloon in self.bloons if bloon.alive and not bloon.reached_end]
         
-        # Update bloons
-        for bloon in self.bloons[:]:
+        # Update bloons - use list comprehension for better performance
+        bloons_to_remove = []
+        for bloon in self.bloons:
             bloon.update()
             if bloon.reached_end:
                 self.lives -= 1
-                self.bloons.remove(bloon)
+                bloons_to_remove.append(bloon)
                 if self.lives <= 0:
                     self.game_over = True
+        
+        # Remove bloons that reached the end
+        for bloon in bloons_to_remove:
+            self.bloons.remove(bloon)
         
         # Update towers and create projectiles
         for tower in self.towers:
@@ -433,22 +449,37 @@ class TowerDefenseGame:
             if new_projectiles:
                 self.projectiles.extend(new_projectiles)
         
-        # Update projectiles
-        for projectile in self.projectiles[:]:
+        # Update projectiles - avoid copying list
+        projectiles_to_remove = []
+        for projectile in self.projectiles:
             projectile.update(self.bloons)
             if not projectile.alive:
-                self.projectiles.remove(projectile)
+                projectiles_to_remove.append(projectile)
         
-        # Remove dead bloons and award money
-        for bloon in self.bloons[:]:
+        # Remove dead projectiles
+        for projectile in projectiles_to_remove:
+            self.projectiles.remove(projectile)
+        
+        # Remove dead bloons and award money - use list comprehension
+        dead_bloons = []
+        for bloon in self.bloons:
             if not bloon.alive:
                 self.money += bloon.reward
-                self.bloons.remove(bloon)
+                dead_bloons.append(bloon)
         
-        # Update tower selection panel hover state
+        # Remove dead bloons
+        for bloon in dead_bloons:
+            self.bloons.remove(bloon)
+        
+        # Update tower selection panel hover state (only when needed)
         if not self.paused and not self.game_over:
             mouse_pos = pygame.mouse.get_pos()
             self.tower_selection_panel.handle_hover(mouse_pos)
+        
+        # Clean up dead objects less frequently to improve performance
+        if len(self.bloons) > 100 or len(self.projectiles) > 200:
+            self.bloons = [bloon for bloon in self.bloons if bloon.alive and not bloon.reached_end]
+            self.projectiles = [proj for proj in self.projectiles if proj.alive]
     
     def draw(self):
         # Draw map
@@ -466,9 +497,8 @@ class TowerDefenseGame:
             # Draw drag line if in drag mode
             if self.dragging_tower and self.drag_start_pos:
                 pygame.draw.line(self.screen, (255, 255, 0), self.drag_start_pos, mouse_pos, 3)
-                # Draw "DRAG TO PLACE" text
-                font = pygame.font.SysFont(None, 24)
-                drag_text = font.render("DRAG TO PLACE", True, (255, 255, 0))
+                # Draw "DRAG TO PLACE" text - use cached font
+                drag_text = self.cached_fonts['small'].render("DRAG TO PLACE", True, (255, 255, 0))
                 text_pos = (mouse_pos[0] + 20, mouse_pos[1] - 30)
                 self.screen.blit(drag_text, text_pos)
         
@@ -483,13 +513,13 @@ class TowerDefenseGame:
         # Draw UI
         self.ui.draw(self.screen, self.money, self.lives, self.wave_number, self.paused)
         
-        # Draw game mode indicator
+        # Draw game mode indicator - use cached fonts
         if self.sandbox_mode:
-            mode_text = pygame.font.SysFont(None, 24).render(f"SANDBOX MODE - Click to spawn {self.sandbox_bloon_type.value.upper()} bloons (Press B to cycle)", True, WHITE)
+            mode_text = self.cached_fonts['small'].render(f"SANDBOX MODE - Click to spawn {self.sandbox_bloon_type.value.upper()} bloons (Press B to cycle)", True, WHITE)
             mode_rect = mode_text.get_rect(topleft=(10, 10))
             self.screen.blit(mode_text, mode_rect)
         else:
-            mode_text = pygame.font.SysFont(None, 24).render("NORMAL MODE", True, WHITE)
+            mode_text = self.cached_fonts['small'].render("NORMAL MODE", True, WHITE)
             mode_rect = mode_text.get_rect(topleft=(10, 10))
             self.screen.blit(mode_text, mode_rect)
         
@@ -504,9 +534,16 @@ class TowerDefenseGame:
         if not self.game_over:
             self.settings_icon.draw(self.screen)
         
-        # Draw game over screen
+        # Draw FPS counter if enabled - use cached font
+        if self.show_fps:
+            fps = int(self.clock.get_fps())
+            fps_text = self.cached_fonts['small'].render(f"FPS: {fps}", True, WHITE)
+            fps_rect = fps_text.get_rect(topright=(SCREEN_WIDTH - 60, 10))
+            self.screen.blit(fps_text, fps_rect)
+        
+        # Draw game over screen - use cached font
         if self.game_over:
-            game_over_text = pygame.font.SysFont(None, 72).render("GAME OVER", True, RED)
+            game_over_text = self.cached_fonts['large'].render("GAME OVER", True, RED)
             text_rect = game_over_text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2))
             self.screen.blit(game_over_text, text_rect)
         
@@ -518,21 +555,21 @@ class TowerDefenseGame:
                 time_remaining = self.auto_start_delay - (current_time - self.wave_completed_time)
                 if time_remaining > 0:
                     seconds_remaining = int(time_remaining / 1000) + 1
-                    hint_text = pygame.font.SysFont(None, 36).render(f"Next wave starts in {seconds_remaining} seconds", True, WHITE)
+                    hint_text = self.cached_fonts['medium'].render(f"Next wave starts in {seconds_remaining} seconds", True, WHITE)
                     text_rect = hint_text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT - 50))
                     self.screen.blit(hint_text, text_rect)
                     
                     # Show manual override hint
-                    override_text = pygame.font.SysFont(None, 24).render("Press SPACE to start immediately", True, WHITE)
+                    override_text = self.cached_fonts['small'].render("Press SPACE to start immediately", True, WHITE)
                     override_rect = override_text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT - 20))
                     self.screen.blit(override_text, override_rect)
                 else:
-                    hint_text = pygame.font.SysFont(None, 36).render("Starting next wave...", True, WHITE)
+                    hint_text = self.cached_fonts['medium'].render("Starting next wave...", True, WHITE)
                     text_rect = hint_text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT - 50))
                     self.screen.blit(hint_text, text_rect)
             else:
                 # Show manual start hint
-                hint_text = pygame.font.SysFont(None, 36).render("Press SPACE to start next wave", True, WHITE)
+                hint_text = self.cached_fonts['medium'].render("Press SPACE to start next wave", True, WHITE)
                 text_rect = hint_text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT - 50))
                 self.screen.blit(hint_text, text_rect)
         
