@@ -181,11 +181,6 @@ class FirebaseService:
         """Get the current authenticated user."""
         return self.current_user
     
-    def logout(self):
-        """Log out the current user."""
-        self.current_user = None
-        self.user_id = None
-    
     # ==================== Game State Management ====================
     
     def save_game(self, game_data: Dict[str, Any], game_id: str = None) -> Optional[str]:

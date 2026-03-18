@@ -60,8 +60,17 @@ class LoginScreen:
         # Check for existing session
         self.auto_login_attempted = False
         
+        # Backend status caching (to avoid expensive network calls every frame)
+        self.backend_status_cache = None
+        self.backend_status_render_cache = None
+        self.last_status_check = 0
+        self.status_check_interval = 2.0  # Check every 2 seconds
+        
         # Pre-render static text surfaces (cache)
         self._cache_static_surfaces()
+        
+        # Perform initial backend status check (will be used on first frame)
+        self._update_backend_status()
     
     def _cache_static_surfaces(self):
         """Pre-render static text to improve performance."""
@@ -91,6 +100,14 @@ class LoginScreen:
         # Google icon circle position
         self.icon_center = (self.google_button.x + 40, self.google_button.y + 30)
         self.g_text_rect = self.g_text_surface.get_rect(center=self.icon_center)
+        
+    def _update_backend_status(self):
+        """Check backend status and cache the result."""
+        self.backend_status_cache = backend_client.is_online()
+        status_color = (0, 200, 0) if self.backend_status_cache else (200, 0, 0)
+        status_text = "Online" if self.backend_status_cache else "Offline"
+        self.backend_status_render_cache = self.tiny_font.render(f"Backend: {status_text}", True, status_color)
+        self.last_status_check = pygame.time.get_ticks() / 1000.0
         
     def handle_event(self, event: pygame.event.Event) -> Optional[str]:
         """
@@ -280,11 +297,15 @@ class LoginScreen:
             error_rect = error_text.get_rect(center=(self.width // 2, self.height - 150))
             self.screen.blit(error_text, error_rect)
         
-        # Draw backend status indicator
-        status_color = (0, 200, 0) if backend_client.is_online() else (200, 0, 0)
-        status_text = "Online" if backend_client.is_online() else "Offline"
-        status_render = self.tiny_font.render(f"Backend: {status_text}", True, status_color)
-        self.screen.blit(status_render, (10, self.height - 25))
+        # Draw backend status indicator (cached - only update every 2 seconds)
+        current_time = pygame.time.get_ticks() / 1000.0
+        if current_time - self.last_status_check >= self.status_check_interval:
+            # Only check backend status periodically to avoid network overhead
+            self._update_backend_status()
+        
+        # Draw cached status render (if available)
+        if self.backend_status_render_cache:
+            self.screen.blit(self.backend_status_render_cache, (10, self.height - 25))
     
     def run(self):
         """Run the login screen loop."""
