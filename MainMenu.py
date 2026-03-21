@@ -7,6 +7,7 @@ from game import TowerDefenseGame
 from game.ui.tower_upgrades_screen import TowerUpgradesScreen
 from game.ui.login_screen import LoginScreen
 from game.services.firebase_service import firebase_service
+from game.services.backend_client import backend_client
 from game.ui.profile_dropdown import ProfileDropdownPanel
 
 pygame.init()
@@ -135,7 +136,8 @@ def main_menu():
                 # Check profile dropdown actions first
                 dropdown_action = profile_dropdown.handle_event(event, (mx, my))
                 if dropdown_action == 'logout':
-                    # Clear session first
+                    # Clear session and logout from both backend and firebase
+                    backend_client.logout()
                     firebase_service.logout()
                     profile_dropdown.hide()
                     
